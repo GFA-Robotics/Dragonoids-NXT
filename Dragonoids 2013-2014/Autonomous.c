@@ -44,7 +44,7 @@ void turn(int degrees, bool clockwise = true, bool inPlace = false) {
 	if (degrees < 0 && !clockwise)
 		degrees = abs(degrees);
 	if (degrees < 0 && clockwise) {
-		degrees = abs(degress);
+		degrees = abs(degrees);
 		clockwise = false;
 	}
 
