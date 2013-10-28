@@ -124,7 +124,7 @@ task main() {
 	string colorString;
 	// Wait 1 second for user input
 	eraseDisplay();
-	nxtDisplayBigTextLine(4, "Press button for Red");
+	nxtDisplayBigTextLine(3, "Press button for Red");
 	wait1Msec(1000);
 	if (nNxtButtonPressed == 3) {
 		// Pressed orange button
@@ -138,7 +138,7 @@ task main() {
 	}
 	// Output color value to the display
 	eraseDisplay();
-	nxtDisplayBigTextLine(4, "%s Alliance");
+	nxtDisplayBigTextLine(3, "%s Alliance");
 
 	// Calibrate the gyro sensor
 	const int calibrationIter = 50;
@@ -148,6 +148,7 @@ task main() {
 	}
 	offset /= calibrationIter;
 
+	nxtDisplayTextLine(6, "Gyro calibration completed");
 	waitForStart();
 	eraseDisplay();
 	turn(45, false);
