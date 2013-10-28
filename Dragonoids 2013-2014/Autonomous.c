@@ -141,9 +141,10 @@ task main() {
 	nxtDisplayBigTextLine(4, "%s Alliance");
 
 	// Calibrate the gyro sensor
-	const int calibrationIter = 10;
+	const int calibrationIter = 50;
 	for (int i = 0; i < calibrationIter; i++) {
 		offset += SensorValue(gyroSensor);
+		wait1Msec(10);
 	}
 	offset /= calibrationIter;
 
