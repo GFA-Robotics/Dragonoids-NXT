@@ -109,6 +109,9 @@ void driver() {
 }
 void arm() {
 	// Function for the 2nd gamepad that controls the arm
+	int armAmount = joy1_y1;
+	armAmount /= 5; // Make values have a rough max speed of 25
+	motor[armMotor] = armAmount;
 }
 
 task main() {
