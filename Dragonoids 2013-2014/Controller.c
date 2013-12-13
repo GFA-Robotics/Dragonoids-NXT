@@ -11,7 +11,7 @@
 #pragma config(Motor,  mtr_S1_C2_1,     motor3,        tmotorTetrix, openLoop)
 #pragma config(Motor,  mtr_S1_C2_2,     motor4,        tmotorTetrix, openLoop)
 #pragma config(Motor,  mtr_S1_C3_1,     armMotor,      tmotorTetrix, openLoop, encoder)
-#pragma config(Motor,  mtr_S1_C3_2,     bucketMotor,   tmotorTetrix, openLoop, encoder)
+#pragma config(Motor,  mtr_S1_C3_2,     unlabeledMotor, tmotorTetrix, openLoop)
 #pragma config(Servo,  srvo_S1_C4_1,    servo1,               tServoNone)
 #pragma config(Servo,  srvo_S1_C4_2,    servo2,               tServoNone)
 #pragma config(Servo,  srvo_S1_C4_3,    servo3,               tServoNone)
@@ -86,8 +86,8 @@ void driver() {
 		return;
 	}
 
-	int forwardAmount = joy1_y1;
-	int turningAmount = joy1_x2;
+	int forwardAmount = joystick.joy1_y1;
+	int turningAmount = joystick.joy1_x2;
 	if (abs(forwardAmount) < threshold)
 		forwardAmount = 0;
 	if (abs(turningAmount) < threshold)
@@ -109,9 +109,27 @@ void driver() {
 }
 void arm() {
 	// Function for the 2nd gamepad that controls the arm
-	int armAmount = joy1_y1;
+	int armAmount = joystick.joy2_y1;
+	int clawAmount = joystick.joy2_y2;
+
+	if (abs(armAmount) < threshold)
+		armAmount = 0;
+	if (abs(clawAmount) < threshold)
+		clawAmount = 0;
+
 	armAmount /= 5; // Make values have a rough max speed of 25
 	motor[armMotor] = armAmount;
+
+	int degreeChange;
+	if (clawAmount < 0)
+		degreeChange = -1;
+	if (clawAmount > 0)
+		degreeChange = 1;
+	servoChangeRate[servo1] = 5;
+	servoChangeRate[servo2] = 5;
+
+	servo[servo1] = ServoValue[servo1] + degreeChange;
+	servo[servo2] = ServoValue[servo2] - degreeChange;
 }
 
 task main() {
