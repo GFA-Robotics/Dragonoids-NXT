@@ -100,13 +100,14 @@ void driver() {
 	if (turningAmount > 0)
 		rightWheelSpeed -= turningAmount;
 	if (turningAmount < 0)
-		leftWheelSpeed -= turningAmount;
+		leftWheelSpeed += turningAmount;
 
 	motor[motor1] = leftWheelSpeed;
 	motor[motor3] = leftWheelSpeed;
 	motor[motor2] = rightWheelSpeed;
 	motor[motor4] = rightWheelSpeed;
 }
+int lastEncoderPos = -70;
 void arm() {
 	// Function for the 2nd gamepad that controls the arm
 	int armAmount = joystick.joy2_y1;
@@ -117,28 +118,41 @@ void arm() {
 	if (abs(clawAmount) < threshold)
 		clawAmount = 0;
 
-	armAmount /= 5; // Make values have a rough max speed of 25
+	armAmount /= 3; // Make values have a rough max speed of 25
 	motor[armMotor] = armAmount;
 
-	int degreeChange;
+	// Hold motor in contant position
+	// Stuff goes here
+
+	int degreeChange = 0;
 	if (clawAmount < 0)
 		degreeChange = -1;
 	if (clawAmount > 0)
 		degreeChange = 1;
-	servoChangeRate[servo1] = 5;
-	servoChangeRate[servo2] = 5;
+	servoChangeRate[servo1] = 7;
+	servoChangeRate[servo2] = 7;
 
 	servo[servo1] = ServoValue[servo1] + degreeChange;
 	servo[servo2] = ServoValue[servo2] - degreeChange;
 }
+void datalogging() {
+	eraseDisplay();
+	int encoderValue = nMotorEncoder[armMotor];
+  nxtDisplayTextLine(2, "Encoder: %d", encoderValue);
+  nxtDisplayTextLine(4, "Servo1: %d", ServoValue[servo1]);
+  nxtDisplayTextLine(5, "Servo2: %d", ServoValue[servo2]);
+}
 
 task main() {
+	servo[servo1] = 180;
+	servo[servo2] = 0;
 	waitForStart();
-	//servoChangeRate[armExt] = 1;
 	while (true) {
+		bFloatDuringInactiveMotorPWM = false;
 		getJoystickSettings(joystick);
 		driver();
 		arm();
+		datalogging();
 		alive();
 	}
 }
