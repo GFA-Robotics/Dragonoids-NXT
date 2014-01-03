@@ -33,129 +33,129 @@ Sensor port 4 = Gyro Sensor for detecting robot rotation for turns
 void forwardMotors(int power) {
   motor[motor1] = power;
   motor[motor2] = power;
-	motor[motor3] = power;
-	motor[motor4] = power;
+  motor[motor3] = power;
+  motor[motor4] = power;
 }
 void stopMotors() {
-    forwardMotors(0);
+  forwardMotors(0);
 }
 // Autonomous flow functions
 void turn(int degrees, bool clockwise = true, bool inPlace = false) {
-	if (degrees < 0 && !clockwise)
-		degrees = abs(degrees);
-	if (degrees < 0 && clockwise) {
-		degrees = abs(degrees);
-		clockwise = false;
-	}
+  if (degrees < 0 && !clockwise)
+    degrees = abs(degrees);
+  if (degrees < 0 && clockwise) {
+    degrees = abs(degrees);
+    clockwise = false;
+  }
 
-	const int powerInTurn = 50;
-	if (clockwise) {
-		motor[motor1] = powerInTurn;
-		motor[motor3] = powerInTurn;
-	}
-	else {
-		motor[motor2] = powerInTurn;
-		motor[motor4] = powerInTurn;
-	}
-	// Rotation is measured in degrees per second
-	const int updatesPerSecond = 100; // Can't be greater than 300
-	float degreesTurned = 0;
-	while (true) {
-		float degreesPerSecond = (float)(SensorValue[gyroSensor] - offset);
-		degreesPerSecond /= updatesPerSecond; // Degrees per update
-		degreesTurned += degreesPerSecond;
-		if ((int)degreesTurned > degrees)
-			break;
-		wait1Msec(1000 / updatesPerSecond);
-	}
-	stopMotors();
+  const int powerInTurn = 50;
+  if (clockwise) {
+    motor[motor1] = powerInTurn;
+    motor[motor3] = powerInTurn;
+  }
+  else {
+    motor[motor2] = powerInTurn;
+    motor[motor4] = powerInTurn;
+  }
+  // Rotation is measured in degrees per second
+  const int updatesPerSecond = 100; // Can't be greater than 300
+  float degreesTurned = 0;
+  while (true) {
+    float degreesPerSecond = (float)(SensorValue[gyroSensor] - offset);
+    degreesPerSecond /= updatesPerSecond; // Degrees per update
+    degreesTurned += degreesPerSecond;
+    if ((int)degreesTurned > degrees)
+      break;
+    wait1Msec(1000 / updatesPerSecond);
+  }
+  stopMotors();
 }
 bool continueUntilIR() {
-    ClearTimer(T1);
-    const int maxRunTime = 20000;
-    int runTime = 0;
-    int IRDir;
-    forwardMotors(50);
-    while (runTime < maxRunTime) {
-        IRDir = HTIRS2readACDir(IRSeeker);
-        if (IRDir == 5) {
-            stopMotors();
-            return true;
-        }
-        if (IRDir > 6 || IRDir <= 0) {
-            // Somethings wrong, the beacon is behind the robot
-            stopMotors();
-            return false;
-        }
-        runTime = time1[T1];
+  ClearTimer(T1);
+  const int maxRunTime = 20000;
+  int runTime = 0;
+  int IRDir;
+  forwardMotors(50);
+  while (runTime < maxRunTime) {
+    IRDir = HTIRS2readACDir(IRSeeker);
+    if (IRDir == 5) {
+      stopMotors();
+      return true;
     }
-    return false;
+    if (IRDir > 6 || IRDir <= 0) {
+      // Somethings wrong, the beacon is behind the robot
+      stopMotors();
+      return false;
+    }
+    runTime = time1[T1];
+  }
+  return false;
 }
 void moveToLine(string color) {
-    ClearTimer(T1);
-    const int maxRunTime = 8000;
-    const int maxFailures = 5000; // This will most likely be changed in the future
+  ClearTimer(T1);
+  const int maxRunTime = 8000;
+  const int maxFailures = 5000; // This will most likely be changed in the future
 
-    int failures = 0;
-    int runTime = 0;
-    string reportedColor;
-    forwardMotors(40);
+  int failures = 0;
+  int runTime = 0;
+  string reportedColor;
+  forwardMotors(40);
 
-    while (runTime < maxRunTime && failures < maxFailures) {
-        reportedColor = SensorValue[colorSensor];
-        if (reportedColor == "???") {
-            failures++;
-            continue;
-        }
-        if (reportedColor == color) {
-            // Found the line
-            stopMotors();
-            return;
-        }
-        runTime = time1[T1];
+  while (runTime < maxRunTime && failures < maxFailures) {
+    reportedColor = SensorValue[colorSensor];
+    if (reportedColor == "???") {
+      failures++;
+      continue;
     }
+    if (reportedColor == color) {
+      // Found the line
+      stopMotors();
+      return;
+    }
+    runTime = time1[T1];
+  }
 }
 void placeBlock() {
-    // To be finished when arm is finalized
-    return;
+  // To be finished when arm is finalized
+  return;
 }
 
 task main() {
-	string colorString;
-	// Wait 1 second for user input
-	eraseDisplay();
-	nxtDisplayBigTextLine(3, "Press button for Red");
-	wait1Msec(1000);
-	if (nNxtButtonPressed == 3) {
-		// Pressed orange button
-		// Red side
-		colorString = "Red";
-	}
-	else {
-		// Not pressed
-		// Blue side
-		colorString = "Blue";
-	}
-	// Output color value to the display
-	eraseDisplay();
-	nxtDisplayBigTextLine(3, "%s Alliance");
+  string colorString;
+  // Wait 1 second for user input
+  eraseDisplay();
+  nxtDisplayBigTextLine(3, "Press button for Red");
+  wait1Msec(1000);
+  if (nNxtButtonPressed == 3) {
+    // Pressed orange button
+    // Red side
+    colorString = "Red";
+  }
+  else {
+    // Not pressed
+    // Blue side
+    colorString = "Blue";
+  }
+  // Output color value to the display
+  eraseDisplay();
+  nxtDisplayBigTextLine(3, "%s Alliance");
 
-	// Calibrate the gyro sensor
-	const int calibrationIter = 50;
-	for (int i = 0; i < calibrationIter; i++) {
-		offset += SensorValue(gyroSensor);
-		wait1Msec(10);
-	}
-	offset /= calibrationIter;
+  // Calibrate the gyro sensor
+  const int calibrationIter = 50;
+  for (int i = 0; i < calibrationIter; i++) {
+    offset += SensorValue(gyroSensor);
+    wait1Msec(10);
+  }
+  offset /= calibrationIter;
 
-	nxtDisplayTextLine(6, "Gyro calibration completed");
-	waitForStart();
-	eraseDisplay();
-	turn(45, false);
-    if (!continueUntilIR()) {
-        return;
-    }
-    turn(90);
-    moveToLine(colorString);
-    placeBlock();
+  nxtDisplayTextLine(6, "Gyro calibration completed");
+  waitForStart();
+  eraseDisplay();
+  turn(45, false);
+  if (!continueUntilIR()) {
+    return;
+  }
+  turn(90);
+  moveToLine(colorString);
+  placeBlock();
 }
