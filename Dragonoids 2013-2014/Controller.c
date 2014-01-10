@@ -1,9 +1,9 @@
 #pragma config(Hubs,  S1, HTMotor,  HTMotor,  HTMotor,  HTServo)
-#pragma config(Sensor, S1,     motorMux,       sensorI2CMuxController)
-#pragma config(Sensor, S2,     IRSeeker,       sensorI2CCustom)
-#pragma config(Sensor, S3,     colorSensor,    sensorCOLORFULL)
+#pragma config(Sensor, S1,     motorMux,       sensorNone)
+#pragma config(Sensor, S2,     colorSensor,    sensorCOLORFULL)
+#pragma config(Sensor, S3,     IRSeeker,       sensorI2CCustom)
 #pragma config(Sensor, S4,     gyroSensor,     sensorI2CHiTechnicGyro)
-#pragma config(Motor,  motorA,           ,             tmotorNXT, openLoop)
+#pragma config(Motor,  motorA,          flagMotor,     tmotorNXT, openLoop)
 #pragma config(Motor,  motorB,           ,             tmotorNXT, openLoop)
 #pragma config(Motor,  motorC,           ,             tmotorNXT, openLoop)
 #pragma config(Motor,  mtr_S1_C1_1,     motor1,        tmotorTetrix, openLoop)
@@ -98,17 +98,23 @@ void driver() {
 	int rightWheelSpeed = forwardAmount;
 	int leftWheelSpeed = forwardAmount;
 	if (turningAmount > 0)
-		rightWheelSpeed -= turningAmount;
+		rightWheelSpeed += turningAmount;
 	if (turningAmount < 0)
-		leftWheelSpeed += turningAmount;
+		leftWheelSpeed -= turningAmount;
 
 	motor[motor1] = leftWheelSpeed;
 	motor[motor3] = leftWheelSpeed;
 	motor[motor2] = rightWheelSpeed;
 	motor[motor4] = rightWheelSpeed;
 }
-int lastEncoderPos = -70;
+int lastEncoderPos = 200;
 void arm() {
+	// Button to reset encoder to 0 at bottom
+	// Button *labeled* 10
+	if (joystick.joy2_Buttons == 512) {
+		nMotorEncoder[armMotor] = 0;
+	}
+
 	// Function for the 2nd gamepad that controls the arm
 	int armAmount = joystick.joy2_y1;
 	int clawAmount = joystick.joy2_y2;
@@ -118,22 +124,62 @@ void arm() {
 	if (abs(clawAmount) < threshold)
 		clawAmount = 0;
 
-	armAmount /= 3; // Make values have a rough max speed of 25
+	const int centerArmPosition = 1000;
+	const short morePowerDivision = 2;
+	const short lessPowerDivision = 6;
+	if (armAmount > 0 && nMotorEncoder[armMotor] < centerArmPosition) {
+		// Apply more power
+		armAmount /= morePowerDivision;
+	}
+	if (armAmount > 0 && nMotorEncoder[armMotor] >= centerArmPosition) {
+		// Apply less power
+		armAmount /= lessPowerDivision;
+	}
+	if (armAmount < 0 && nMotorEncoder[armMotor] < centerArmPosition) {
+		// Apply less power
+		armAmount /= lessPowerDivision;
+	}
+	if (armAmount < 0 && nMotorEncoder[armMotor] >= centerArmPosition) {
+		// Apply more power
+		armAmount /= morePowerDivision;
+	}
 	motor[armMotor] = armAmount;
 
-	// Hold motor in contant position
-	// Stuff goes here
+	// Hold motor in constant position
+	const int armThreshold = 5;
+	const int powerToApply = 5;
+	int currentEncoderPos = nMotorEncoder[armMotor];
+	int rotationSinceLastMoved = currentEncoderPos - lastEncoderPos;
+	if (abs(rotationSinceLastMoved) > armThreshold) {
+		if (rotationSinceLastMoved > 0)
+			motor[armMotor] += powerToApply;
+		if (rotationSinceLastMoved < 0)
+			motor[armMotor] -= powerToApply;
+	}
+
+	if (armAmount != 0)
+		lastEncoderPos = currentEncoderPos;
 
 	int degreeChange = 0;
 	if (clawAmount < 0)
-		degreeChange = -1;
+		degreeChange = -3;
 	if (clawAmount > 0)
-		degreeChange = 1;
-	servoChangeRate[servo1] = 7;
-	servoChangeRate[servo2] = 7;
+		degreeChange = 3;
+	servoChangeRate[servo1] = 20;
+	servoChangeRate[servo2] = 20;
 
 	servo[servo1] = ServoValue[servo1] + degreeChange;
 	servo[servo2] = ServoValue[servo2] - degreeChange;
+
+	// Flag raiser
+	int flagMotorSpeed = 0;
+	if (joy2Btn(5) == 1) {
+		flagMotorSpeed = 75;
+	}
+	if (joy2Btn(6) == 1) {
+		flagMotorSpeed = -75;
+	}
+	motor[flagMotor] = flagMotorSpeed;
 }
 void datalogging() {
 	eraseDisplay();
@@ -144,9 +190,21 @@ void datalogging() {
 }
 
 task main() {
-	servo[servo1] = 180;
+	//nMotorEncoder[armMotor] = 1500; // Staight up
+	// Closed to begin with
+	servo[servo1] = 270;
 	servo[servo2] = 0;
 	waitForStart();
+	/*if (nMotorEncoder[armMotor] >= 1000) {
+		// Arm is layed back
+		while (nMotorEncoder[armMotor] >= 1000) {
+			motor[armMotor] = -75;
+		}
+		while (nMotorEncoder[armMotor] > 200) {
+			motor[armMotor] = -10;
+		}
+		motor[armMotor] = 0;
+	}*/
 	while (true) {
 		bFloatDuringInactiveMotorPWM = false;
 		getJoystickSettings(joystick);
