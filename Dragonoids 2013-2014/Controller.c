@@ -1,9 +1,9 @@
 #pragma config(Hubs,  S1, HTMotor,  HTMotor,  HTMotor,  HTServo)
-#pragma config(Sensor, S1,     motorMux,       sensorNone)
+#pragma config(Sensor, S1,     motorMux,       sensorI2CMuxController)
 #pragma config(Sensor, S2,     colorSensor,    sensorCOLORFULL)
 #pragma config(Sensor, S3,     IRSeeker,       sensorI2CCustom)
 #pragma config(Sensor, S4,     gyroSensor,     sensorI2CHiTechnicGyro)
-#pragma config(Motor,  motorA,          flagMotor,     tmotorNXT, openLoop)
+#pragma config(Motor,  motorA,           ,             tmotorNXT, openLoop)
 #pragma config(Motor,  motorB,           ,             tmotorNXT, openLoop)
 #pragma config(Motor,  motorC,           ,             tmotorNXT, openLoop)
 #pragma config(Motor,  mtr_S1_C1_1,     motor1,        tmotorTetrix, openLoop)
@@ -11,7 +11,7 @@
 #pragma config(Motor,  mtr_S1_C2_1,     motor3,        tmotorTetrix, openLoop)
 #pragma config(Motor,  mtr_S1_C2_2,     motor4,        tmotorTetrix, openLoop)
 #pragma config(Motor,  mtr_S1_C3_1,     armMotor,      tmotorTetrix, openLoop, encoder)
-#pragma config(Motor,  mtr_S1_C3_2,     unlabeledMotor, tmotorTetrix, openLoop)
+#pragma config(Motor,  mtr_S1_C3_2,     flagMotor,     tmotorTetrix, openLoop)
 #pragma config(Servo,  srvo_S1_C4_1,    servo1,               tServoNone)
 #pragma config(Servo,  srvo_S1_C4_2,    servo2,               tServoNone)
 #pragma config(Servo,  srvo_S1_C4_3,    servo3,               tServoNone)
@@ -174,10 +174,10 @@ void arm() {
 	// Flag raiser
 	int flagMotorSpeed = 0;
 	if (joy2Btn(5) == 1) {
-		flagMotorSpeed = 75;
+		flagMotorSpeed = 10;
 	}
 	if (joy2Btn(6) == 1) {
-		flagMotorSpeed = -75;
+		flagMotorSpeed = -10;
 	}
 	motor[flagMotor] = flagMotorSpeed;
 }
