@@ -117,12 +117,12 @@ void arm() {
 
 	// Function for the 2nd gamepad that controls the arm
 	int armAmount = joystick.joy2_y1;
-	int clawAmount = joystick.joy2_y2;
+	int wristAmount = joystick.joy2_y2;
 
 	if (abs(armAmount) < threshold)
 		armAmount = 0;
-	if (abs(clawAmount) < threshold)
-		clawAmount = 0;
+	if (abs(wristAmount) < threshold)
+		wristAmount = 0;
 
 	const int centerArmPosition = 1000;
 	const short morePowerDivision = 2;
@@ -161,9 +161,9 @@ void arm() {
 		lastEncoderPos = currentEncoderPos;
 
 	int degreeChange = 0;
-	if (clawAmount < 0)
+	if (wristAmount < 0)
 		degreeChange = -3;
-	if (clawAmount > 0)
+	if (wristAmount > 0)
 		degreeChange = 3;
 	servoChangeRate[servo1] = 20;
 	servoChangeRate[servo2] = 20;
@@ -184,16 +184,15 @@ void arm() {
 void datalogging() {
 	eraseDisplay();
 	int encoderValue = nMotorEncoder[armMotor];
-  nxtDisplayTextLine(2, "Encoder: %d", encoderValue);
-  nxtDisplayTextLine(4, "Servo1: %d", ServoValue[servo1]);
-  nxtDisplayTextLine(5, "Servo2: %d", ServoValue[servo2]);
+	nxtDisplayTextLine(2, "Encoder: %d", encoderValue);
+	nxtDisplayTextLine(4, "Servo1: %d", ServoValue[servo1]);
+	nxtDisplayTextLine(5, "Servo2: %d", ServoValue[servo2]);
 }
 
 task main() {
 	//nMotorEncoder[armMotor] = 1500; // Staight up
 	// Closed to begin with
-	servo[servo1] = 270;
-	servo[servo2] = 0;
+	servo[servo1] = 0;
 	waitForStart();
 	/*if (nMotorEncoder[armMotor] >= 1000) {
 		// Arm is layed back
@@ -211,6 +210,7 @@ task main() {
 		driver();
 		arm();
 		datalogging();
+		// RobotC function for keeping the robot on
 		alive();
 	}
 }
