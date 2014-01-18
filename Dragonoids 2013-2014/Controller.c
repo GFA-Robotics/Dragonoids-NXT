@@ -173,11 +173,11 @@ void arm() {
 
 	// Flag raiser
 	int flagMotorSpeed = 0;
-	if (joy2Btn(5) == 1) {
-		flagMotorSpeed = 25;
+	if (joy2Btn(4) == 1) {
+		flagMotorSpeed = -25;
 	}
-	if (joy2Btn(6) == 1) {
-		flagMotorSpeed = 250;
+	if (joy2Btn(5) == 1) {
+		flagMotorSpeed = -250;
 	}
 	motor[flagMotor] = flagMotorSpeed;
 }
