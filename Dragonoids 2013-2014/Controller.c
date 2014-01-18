@@ -177,7 +177,7 @@ void arm() {
 		flagMotorSpeed = 25;
 	}
 	if (joy2Btn(6) == 1) {
-		flagMotorSpeed = -25;
+		flagMotorSpeed = 250;
 	}
 	motor[flagMotor] = flagMotorSpeed;
 }
