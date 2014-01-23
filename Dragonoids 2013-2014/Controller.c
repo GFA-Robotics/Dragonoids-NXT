@@ -118,16 +118,37 @@ void arm() {
 	if (abs(wristAmount) < threshold)
 		wristAmount = 0;
 
+	int maxArmAmountPositive = 50;
+	int maxArmAmountNegative = -10;
+	if (joy1Btn(1) == 1) {
+		maxArmAmountPositive = 50;
+		PlaySound(soundShortBlip);
+	}
+	else if (joy1Btn(2) == 1) {
+		maxArmAmountPositive = 80;
+		PlaySound(soundShortBlip);
+	}
+	else {
+			ClearSounds();
+	}
+
+	armAmount /= 4;
+	if (armAmount < maxArmAmountNegative)
+		armAmount = maxArmAmountNegative;
+	if (armAmount > maxArmAmountPositive)
+		armAmount = maxArmAmountPositive;
+	motor[armMotor] = armAmount;
+
 	int degreeChange = 0;
 	if (wristAmount < 0)
-		degreeChange = -3;
+		degreeChange = -1;
 	if (wristAmount > 0)
-		degreeChange = 3;
-	servoChangeRate[servo1] = 20;
-	servoChangeRate[servo2] = 20;
+		degreeChange = 1;
+	servoChangeRate[servo1] = 50;
+	servoChangeRate[servo2] = 50;
 
-	servo[servo1] = ServoValue[servo1] + degreeChange;
-	servo[servo2] = ServoValue[servo2] - degreeChange;
+	servo[servo1] = ServoValue[servo1] - degreeChange;
+	//servo[servo2] = ServoValue[servo2] - degreeChange;
 
 	// Flag raiser
 	int flagMotorSpeed = 0;
@@ -148,20 +169,9 @@ void datalogging() {
 }
 
 task main() {
-	//nMotorEncoder[armMotor] = 1500; // Staight up
-	// Closed to begin with
-	servo[servo1] = 0;
+	servo[servo1] = 90;
 	waitForStart();
-	/*if (nMotorEncoder[armMotor] >= 1000) {
-		// Arm is layed back
-		while (nMotorEncoder[armMotor] >= 1000) {
-			motor[armMotor] = -75;
-		}
-		while (nMotorEncoder[armMotor] > 200) {
-			motor[armMotor] = -10;
-		}
-		motor[armMotor] = 0;
-	}*/
+
 	while (true) {
 		bFloatDuringInactiveMotorPWM = false;
 		getJoystickSettings(joystick);
