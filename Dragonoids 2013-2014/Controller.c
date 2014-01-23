@@ -7,9 +7,9 @@
 #pragma config(Motor,  motorB,           ,             tmotorNXT, openLoop)
 #pragma config(Motor,  motorC,           ,             tmotorNXT, openLoop)
 #pragma config(Motor,  mtr_S1_C1_1,     rearRight,     tmotorTetrix, openLoop)
-#pragma config(Motor,  mtr_S1_C1_2,     rearLeft,      tmotorTetrix, openLoop)
+#pragma config(Motor,  mtr_S1_C1_2,     rearLeft,      tmotorTetrix, openLoop, reversed)
 #pragma config(Motor,  mtr_S1_C2_1,     frontRight,    tmotorTetrix, openLoop)
-#pragma config(Motor,  mtr_S1_C2_2,     frontLeft,     tmotorTetrix, openLoop)
+#pragma config(Motor,  mtr_S1_C2_2,     frontLeft,     tmotorTetrix, openLoop, reversed)
 #pragma config(Motor,  mtr_S1_C3_1,     armMotor,      tmotorTetrix, openLoop)
 #pragma config(Motor,  mtr_S1_C3_2,     flagMotor,     tmotorTetrix, openLoop)
 #pragma config(Servo,  srvo_S1_C4_1,    wrist,                tServoStandard)
@@ -31,18 +31,18 @@ Gamepad 1 is driving
 Gamepad 2 is arm control
 */
 void stopMotors() {
-	motor[motor1] = 0;
-  motor[motor2] = 0;
-	motor[motor3] = 0;
-	motor[motor4] = 0;
+	motor[frontLeft] = 0;
+  motor[frontRight] = 0;
+	motor[rearLeft] = 0;
+	motor[rearRight] = 0;
 }
 void rightSidePower(int power) {
-	motor[motor2] = power;
-	motor[motor4] = power;
+	motor[frontRight] = power;
+	motor[rearRight] = power;
 }
 void leftSidePower(int power) {
-	motor[motor1] = power;
-	motor[motor3] = power;
+	motor[frontLeft] = power;
+	motor[rearLeft] = power;
 }
 
 const int threshold = 10;
@@ -57,17 +57,20 @@ void driver() {
 		scaler = 6;
 		PlaySound(soundBeepBeep);
 	}
-	if (joy1Btn(2) == 1) {
+	else if (joy1Btn(2) == 1) {
 		scaler = 4;
 		PlaySound(soundBeepBeep);
 	}
-	if (joy1Btn(3) == 1) {
+	else if (joy1Btn(3) == 1) {
 		scaler = 2;
 		PlaySound(soundBeepBeep);
 	}
-	if (joy1Btn(4) == 1) {
+	else if (joy1Btn(4) == 1) {
 		scaler = 1;
 		PlaySound(soundBeepBeep);
+	}
+	else {
+			ClearSounds();
 	}
 
 	// Turning in place
@@ -98,24 +101,15 @@ void driver() {
 	int rightWheelSpeed = forwardAmount;
 	int leftWheelSpeed = forwardAmount;
 	if (turningAmount > 0)
-		rightWheelSpeed += turningAmount;
+		leftWheelSpeed += turningAmount;
 	if (turningAmount < 0)
-		leftWheelSpeed -= turningAmount;
+		rightWheelSpeed -= turningAmount;
 
-	motor[motor1] = leftWheelSpeed;
-	motor[motor3] = leftWheelSpeed;
-	motor[motor2] = rightWheelSpeed;
-	motor[motor4] = rightWheelSpeed;
+	leftSidePower(leftWheelSpeed);
+	rightSidePower(rightWheelSpeed);
 }
-int lastEncoderPos = 200;
-void arm() {
-	// Button to reset encoder to 0 at bottom
-	// Button *labeled* 10
-	if (joystick.joy2_Buttons == 512) {
-		nMotorEncoder[armMotor] = 0;
-	}
 
-	// Function for the 2nd gamepad that controls the arm
+void arm() {
 	int armAmount = joystick.joy2_y1;
 	int wristAmount = joystick.joy2_y2;
 
@@ -123,42 +117,6 @@ void arm() {
 		armAmount = 0;
 	if (abs(wristAmount) < threshold)
 		wristAmount = 0;
-
-	const int centerArmPosition = 1000;
-	const short morePowerDivision = 2;
-	const short lessPowerDivision = 6;
-	if (armAmount > 0 && nMotorEncoder[armMotor] < centerArmPosition) {
-		// Apply more power
-		armAmount /= morePowerDivision;
-	}
-	if (armAmount > 0 && nMotorEncoder[armMotor] >= centerArmPosition) {
-		// Apply less power
-		armAmount /= lessPowerDivision;
-	}
-	if (armAmount < 0 && nMotorEncoder[armMotor] < centerArmPosition) {
-		// Apply less power
-		armAmount /= lessPowerDivision;
-	}
-	if (armAmount < 0 && nMotorEncoder[armMotor] >= centerArmPosition) {
-		// Apply more power
-		armAmount /= morePowerDivision;
-	}
-	motor[armMotor] = armAmount;
-
-	// Hold motor in constant position
-	const int armThreshold = 5;
-	const int powerToApply = 5;
-	int currentEncoderPos = nMotorEncoder[armMotor];
-	int rotationSinceLastMoved = currentEncoderPos - lastEncoderPos;
-	if (abs(rotationSinceLastMoved) > armThreshold) {
-		if (rotationSinceLastMoved > 0)
-			motor[armMotor] += powerToApply;
-		if (rotationSinceLastMoved < 0)
-			motor[armMotor] -= powerToApply;
-	}
-
-	if (armAmount != 0)
-		lastEncoderPos = currentEncoderPos;
 
 	int degreeChange = 0;
 	if (wristAmount < 0)
@@ -177,7 +135,7 @@ void arm() {
 		flagMotorSpeed = -25;
 	}
 	if (joy2Btn(5) == 1) {
-		flagMotorSpeed = -250;
+		flagMotorSpeed = -50;
 	}
 	motor[flagMotor] = flagMotorSpeed;
 }
