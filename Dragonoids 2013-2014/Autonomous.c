@@ -1,8 +1,8 @@
 #pragma config(Hubs,  S1, HTMotor,  HTMotor,  HTMotor,  HTServo)
 #pragma config(Sensor, S1,     motorMux,       sensorNone)
-#pragma config(Sensor, S2,     ultrasonic,     sensorSONAR)
+#pragma config(Sensor, S2,     IRSeeker,       sensorI2CCustom)
 #pragma config(Sensor, S3,     gyroSensor,     sensorAnalogInactive)
-#pragma config(Sensor, S4,     IRSeeker,       sensorI2CCustom)
+#pragma config(Sensor, S4,     ultrasonic,     sensorSONAR)
 #pragma config(Motor,  motorA,           ,             tmotorNXT, openLoop)
 #pragma config(Motor,  motorB,           ,             tmotorNXT, openLoop)
 #pragma config(Motor,  motorC,           ,             tmotorNXT, openLoop)
@@ -82,7 +82,7 @@ task main() {
 
   nxtDisplayTextLine(6, "Waiting for start...");
   PlaySound(soundUpwardTones);
-  waitForStart();
+  //waitForStart();
   eraseDisplay();
   // Spawn the gyro heading task
   StartTask(gyro, kHighPriority);
