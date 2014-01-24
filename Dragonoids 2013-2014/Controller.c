@@ -13,7 +13,7 @@
 #pragma config(Motor,  mtr_S1_C3_1,     armMotor,      tmotorTetrix, openLoop)
 #pragma config(Motor,  mtr_S1_C3_2,     flagMotor,     tmotorTetrix, openLoop)
 #pragma config(Servo,  srvo_S1_C4_1,    wrist,                tServoStandard)
-#pragma config(Servo,  srvo_S1_C4_2,    armThing,             tServoStandard)
+#pragma config(Servo,  srvo_S1_C4_2,    flagRaiserExtender,   tServoStandard)
 #pragma config(Servo,  srvo_S1_C4_3,    servo3,               tServoNone)
 #pragma config(Servo,  srvo_S1_C4_4,    servo4,               tServoNone)
 #pragma config(Servo,  srvo_S1_C4_5,    servo5,               tServoNone)
@@ -140,11 +140,11 @@ void arm() {
 		degreeChange = -5;
 	if (wristAmount > 0)
 		degreeChange = 5;
-	servoChangeRate[servo1] = 50;
-	servoChangeRate[servo2] = 50;
+	servoChangeRate[wrist] = 50;
+	servoChangeRate[flagRaiserExtender] = 50;
 
-	servo[servo1] = ServoValue[servo1] - degreeChange;
-	//servo[servo2] = ServoValue[servo2] - degreeChange;
+	servo[wrist] = ServoValue[wrist] - degreeChange;
+	//servo[flagRaiserExtender] = ServoValue[flagRaiserExtender] - degreeChange;
 
 	// Flag raiser
 	int flagMotorSpeed = 0;
@@ -159,13 +159,14 @@ void arm() {
 void datalogging() {
 	eraseDisplay();
 	int encoderValue = nMotorEncoder[armMotor];
-	nxtDisplayTextLine(2, "Encoder: %d", encoderValue);
-	nxtDisplayTextLine(4, "Servo1: %d", ServoValue[servo1]);
-	nxtDisplayTextLine(5, "Servo2: %d", ServoValue[servo2]);
+	//nxtDisplayTextLine(2, "Encoder: %d", encoderValue);
+	nxtDisplayTextLine(2, "Encoder: %s", "N/A");
+	nxtDisplayTextLine(4, "Wrist: %d", ServoValue[wrist]);
+	nxtDisplayTextLine(5, "Flag: %d", ServoValue[flagRaiserExtender]);
 }
 
 task main() {
-	servo[servo1] = 90;
+	servo[wrist] = 90;
 	waitForStart();
 
 	while (true) {
