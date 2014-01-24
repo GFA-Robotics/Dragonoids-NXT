@@ -137,9 +137,9 @@ void arm() {
 
 	int degreeChange = 0;
 	if (wristAmount < 0)
-		degreeChange = -1;
+		degreeChange = -5;
 	if (wristAmount > 0)
-		degreeChange = 1;
+		degreeChange = 5;
 	servoChangeRate[servo1] = 50;
 	servoChangeRate[servo2] = 50;
 
