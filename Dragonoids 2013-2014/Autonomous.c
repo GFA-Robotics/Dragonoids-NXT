@@ -48,7 +48,9 @@ task gyro() {
 	float rotSpeed = 0;
   heading = 0;
 
-  // Reset the timer.
+  // Reset the timer
+  // USES TIMER 4
+  // DO NOT USE TIMER 4 ELSEWARE IN THIS PROGRAM
   time1[T4] = 0;
   while (true)
   {
@@ -57,7 +59,7 @@ task gyro() {
       wait1Msec(1);
 
     // Reset the timer
-    time1[T4]=0;
+    time1[T4] = 0;
 
     // Read the current rotation speed
     rotSpeed = HTGYROreadRot(gyroSensor);
@@ -76,9 +78,9 @@ task gyro() {
 task main() {
 	// Calibrate the gyro, make sure you hold the sensor still
   HTGYROstartCal(gyroSensor);
-  nxtDisplayTextLine(5, "Gyro calibration completed");
+  nxtDisplayTextLine(4, "Gyro calibration completed");
 
-  nxtDisplayTextLine(7, "Waiting for start...");
+  nxtDisplayTextLine(6, "Waiting for start...");
   waitForStart();
   eraseDisplay();
   // Spawn the gyro heading task
