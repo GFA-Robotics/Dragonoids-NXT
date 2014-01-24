@@ -81,16 +81,108 @@ task main() {
   nxtDisplayTextLine(4, "Gyro calibration completed");
 
   nxtDisplayTextLine(6, "Waiting for start...");
+  PlaySound(soundUpwardTones);
   waitForStart();
   eraseDisplay();
   // Spawn the gyro heading task
   StartTask(gyro, kHighPriority);
+	const int power = 40;
+
+	// -45 degrees
+  while (heading > -45) {
+  	rightSidePower(power);
+	}
+	// Forward until 5 IR signal
+	ClearTimer(T1);
+	int IRDir = HTIRS2readACDir(IRSeeker);
+	int errors = 0;
+	while (true) {
+		if (errors > 100)
+			// Stop the autonomous program if errors are coming from the IRSeeker
+			stopMotors();
+			return;
+		IRDir = HTIRS2readACDir(IRSeeker);
+		if (IRDir < 1 || IRDir > 9) {
+			errors++;
+			continue;
+		}
+		// If sensor is ahead of us
+		if (IRDir < 5) {
+			rightSidePower(power);
+			leftSidePower(power);
+		}
+		// If sensor is behind us for some reason
+		if (IRDir > 5) {
+			rightSidePower(-power);
+			leftSidePower(-power);
+		}
+		// Centered IR beacon
+		if (IRDir == 5) {
+			stopMotors();
+			break;
+		}
+	}
+	long timeToFindIR = time1[T1];
+	// +90 degrees
+	heading = 0;
+	while (heading < 90) {
+  	rightSidePower(-power);
+  	leftSidePower(power);
+	}
+	// Place in bin
+	servoChangeRate[wrist] = 2;
+	const int moveToPosition = 180;
+	servo[wrist] = moveToPosition;
+	while (ServoValue[wrist] < moveToPosition) {
+		wait1Msec(20);
+	}
+	// +90 degrees
+	heading = 0;
+	while (heading < 90) {
+  	rightSidePower(-power);
+  	leftSidePower(power);
+	}
+	// Retract arm
+	motor[armMotor] = -20;
+	wait1Msec(500);
+	motor[armMotor] = 0;
+
+	// Drive forward same time it took to get to beacon
+	rightSidePower(power);
+	leftSidePower(power);
+	wait1Msec(timeToFindIR);
+	stopMotors();
+	// -90 degrees
+	heading = 0;
+	while (heading > -90) {
+  	rightSidePower(-power);
+  	leftSidePower(power);
+	}
+	// Forward a bit to line up with ramp
+	rightSidePower(power);
+	leftSidePower(power);
+	wait1Msec(2000);
+	stopMotors();
+ 	// -90 degrees
+	heading = 0;
+	while (heading > -90) {
+  	rightSidePower(-power);
+  	leftSidePower(power);
+	}
+ 	// Forward time it takes to get to ramp
+	rightSidePower(power);
+	leftSidePower(power);
+	wait1Msec(timeToFindIR);
+	stopMotors();
+
+	PlaySound(soundDownwardTones);
 
   /* Game plan
   -45 degrees
   Forward until 5 IR signal
   +90 degrees
   Place in bin
+  +90 degrees
   Retract arm
   Drive forward same time it took to get to beacon
   -90 degrees
