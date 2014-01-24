@@ -85,4 +85,17 @@ task main() {
   eraseDisplay();
   // Spawn the gyro heading task
   StartTask(gyro, kHighPriority);
+
+  /* Game plan
+  -45 degrees
+  Forward until 5 IR signal
+  +90 degrees
+  Place in bin
+  Retract arm
+  Drive forward same time it took to get to beacon
+  -90 degrees
+  Forward a bit
+  -90 degrees
+  Forward time it takes to get to ramp
+  */
 }
