@@ -122,14 +122,10 @@ void arm() {
 	int maxArmAmountNegative = -10;
 	if (joy1Btn(1) == 1) {
 		maxArmAmountPositive = 50;
-		PlaySound(soundShortBlip);
+		//PlaySound(soundShortBlip);
 	}
 	else if (joy1Btn(2) == 1) {
 		maxArmAmountPositive = 80;
-		PlaySound(soundShortBlip);
-	}
-	else {
-			ClearSounds();
 	}
 
 	armAmount /= 4;
