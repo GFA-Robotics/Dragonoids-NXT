@@ -50,7 +50,7 @@ task gyro() {
 
   // Reset the timer
   // USES TIMER 4
-  // DO NOT USE TIMER 4 ELSEWARE IN THIS PROGRAM
+  // DO NOT USE TIMER 4 ELSEWHERE IN THIS PROGRAM
   time1[T4] = 0;
   while (true)
   {
@@ -72,7 +72,7 @@ task gyro() {
     heading += rotSpeed * 0.02;
 
     // Display our current heading on the screen
-    nxtDisplayCenteredTextLine(4, "%2.0f", heading);
+    nxtDisplayCenteredTextLine(4, "%2.2f", heading);
 	}
 }
 task main() {
@@ -83,28 +83,26 @@ task main() {
   nxtDisplayTextLine(6, "Waiting for start...");
   PlaySound(soundUpwardTones);
   //waitForStart();
+  wait1Msec(1000);
   eraseDisplay();
   // Spawn the gyro heading task
   StartTask(gyro, kHighPriority);
 	const int power = 40;
 
 	// -45 degrees
-  while (heading > -45) {
+  /*while (heading > -15) {
   	rightSidePower(power);
-	}
+	}*/
 	// Forward until 5 IR signal
 	ClearTimer(T1);
 	int IRDir = HTIRS2readACDir(IRSeeker);
-	int errors = 0;
 	while (true) {
-		if (errors > 100)
-			// Stop the autonomous program if errors are coming from the IRSeeker
-			stopMotors();
-			return;
 		IRDir = HTIRS2readACDir(IRSeeker);
-		if (IRDir < 1 || IRDir > 9) {
-			errors++;
-			continue;
+		if (IRDir == -1) {
+			// Stop the autonomous program if the IR seeker isn't connected
+			stopMotors();
+			PlaySound(soundException);
+			return;
 		}
 		// If sensor is ahead of us
 		if (IRDir < 5) {
@@ -125,7 +123,7 @@ task main() {
 	long timeToFindIR = time1[T1];
 	// +90 degrees
 	heading = 0;
-	while (heading < 90) {
+	while (heading < 30) {
   	rightSidePower(-power);
   	leftSidePower(power);
 	}
@@ -138,7 +136,7 @@ task main() {
 	}
 	// +90 degrees
 	heading = 0;
-	while (heading < 90) {
+	while (heading < 30) {
   	rightSidePower(-power);
   	leftSidePower(power);
 	}
@@ -154,7 +152,7 @@ task main() {
 	stopMotors();
 	// -90 degrees
 	heading = 0;
-	while (heading > -90) {
+	while (heading > -30) {
   	rightSidePower(-power);
   	leftSidePower(power);
 	}
@@ -165,7 +163,7 @@ task main() {
 	stopMotors();
  	// -90 degrees
 	heading = 0;
-	while (heading > -90) {
+	while (heading > -30) {
   	rightSidePower(-power);
   	leftSidePower(power);
 	}
