@@ -158,7 +158,7 @@ void arm() {
 }
 void datalogging() {
 	eraseDisplay();
-	int encoderValue = nMotorEncoder[armMotor];
+	//int encoderValue = nMotorEncoder[armMotor];
 	//nxtDisplayTextLine(2, "Encoder: %d", encoderValue);
 	nxtDisplayTextLine(2, "Encoder: %s", "N/A");
 	nxtDisplayTextLine(4, "Wrist: %d", ServoValue[wrist]);
