@@ -77,15 +77,15 @@ void driver() {
 	if (joy1Btn(5) == 1) {
 		// Counter clockwise turn
 		int powerLevel = 128 / scaler;
-		rightSidePower(-powerLevel);
-		leftSidePower(powerLevel);
+		rightSidePower(powerLevel);
+		leftSidePower(-powerLevel);
 		return;
 	}
 	if (joy1Btn(6) == 1) {
 		// Clockwise turn
 		int powerLevel = 128 / scaler;
-		rightSidePower(powerLevel);
-		leftSidePower(-powerLevel);
+		rightSidePower(-powerLevel);
+		leftSidePower(powerLevel);
 		return;
 	}
 
