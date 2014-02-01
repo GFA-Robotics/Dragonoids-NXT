@@ -79,8 +79,12 @@ task gyro() {
 }
 task main() {
 	servoChangeRate[flagRaiserExtender] = 5;
+	servoChangeRate[autoBlock] = 5;
+	servoChangeRate[autoArm] = 3;
+
 	servo[flagRaiserExtender] = 220;
 	servo[blockPusher] = 255;
+	servo[wrist] = 200;
 
 	servo[autoArm] = 1;
 	servo[autoBlock] = 200;
@@ -93,7 +97,7 @@ task main() {
   PlaySound(soundUpwardTones);
 
   wait1Msec(5000);
-  //waitForStart();
+ 	//waitForStart();
   eraseDisplay();
   // Spawn the gyro heading task
   StartTask(gyro, kHighPriority);
@@ -104,9 +108,31 @@ task main() {
   /*while (heading > -15) {
   	rightSidePower(power);
 	}*/
+	// Forward in case of first IR beacon position
+	int IRDir = HTIRS2readACDir(IRSeeker);
+	int initialMoveTime = 0;
+	if (IRDir == 0) {
+		initialMoveTime = 0;
+	}
+	if (IRDir == 3 || IRDir == 4) {
+		initialMoveTime = 1000;
+	}
+
+	rightSidePower(-power);
+	leftSidePower(-power);
+	wait1Msec(initialMoveTime);
+	stopMotors();
+
+	//IRDir = HTIRS2readACDir(IRSeeker);
+	//if (IRDir == 5) {
+	//	rightSidePower(-power);
+	//	leftSidePower(-power);
+	//	wait1Msec(300);
+	//	stopMotors();
+	//}
+
 	// Forward until 5 IR signal
 	ClearTimer(T1);
-	int IRDir = HTIRS2readACDir(IRSeeker);
 	while (true) {
 		IRDir = HTIRS2readACDir(IRSeeker);
 		if (IRDir == -1) {
@@ -134,8 +160,6 @@ task main() {
 	long timeToFindIR = time1[T1];
 
 	// Place in bin
-	servoChangeRate[autoArm] = 2;
-	servoChangeRate[autoBlock] = 2;
 	const int autoArmMoveTo = 250;
 	const int autoBlockMoveTo = 1;
 	servo[autoArm] = autoArmMoveTo;
@@ -150,38 +174,45 @@ task main() {
 	}
 
 	// Retract arm
-	servo[autoArm] = 1;
 	servo[autoBlock] = 200;
-
+	while (ServoValue[autoBlock] < 200) {
+		wait1Msec(20);
+	}
+	servo[autoArm] = 1;
+	while (ServoValue[autoArm] > 1) {
+		wait1Msec(20);
+	}
 	// Drive forward same time it took to get to beacon
 	rightSidePower(power);
 	leftSidePower(power);
-	wait1Msec(timeToFindIR);
+	wait1Msec(timeToFindIR + initialMoveTime);
 	stopMotors();
 
+	wait1Msec(1000);
 	// -90 degrees
-	heading = 0;
-	while (heading > -25) {
-  	rightSidePower(power);
-  	leftSidePower(-power);
+	while (heading > -18) {
+  	rightSidePower(turnPower);
+  	leftSidePower(-turnPower);
 	}
+	stopMotors();
 	wait1Msec(1000);
 	// Forward a bit to line up with ramp
 	rightSidePower(power);
 	leftSidePower(power);
-	wait1Msec(1500);
+	wait1Msec(1650);
 	stopMotors();
- 	// -90 degrees
-	heading = 0;
-	while (heading > -25) {
-  	rightSidePower(power);
-  	leftSidePower(-power);
-	}
+ 	// +90 degrees
 	wait1Msec(1000);
- 	// Forward time it takes to get to ramp
-	rightSidePower(power);
-	leftSidePower(power);
-	wait1Msec(timeToFindIR);
+	while (heading < 0) {
+  	rightSidePower(-turnPower);
+  	leftSidePower(turnPower);
+	}
+	stopMotors();
+	wait1Msec(1000);
+ 	// Backward time it takes to get to ramp
+	rightSidePower(-power);
+	leftSidePower(-power);
+	wait1Msec(2000);
 	stopMotors();
 
 	PlaySound(soundDownwardTones);
