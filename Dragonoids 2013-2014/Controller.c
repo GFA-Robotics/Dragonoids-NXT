@@ -1,8 +1,8 @@
 #pragma config(Hubs,  S1, HTMotor,  HTMotor,  HTMotor,  HTServo)
 #pragma config(Sensor, S1,     motorMux,       sensorI2CMuxController)
-#pragma config(Sensor, S2,     IRSeeker,       sensorI2CCustom)
+#pragma config(Sensor, S2,     ultrasonic,     sensorSONAR)
 #pragma config(Sensor, S3,     gyroSensor,     sensorAnalogInactive)
-#pragma config(Sensor, S4,     ultrasonic,     sensorSONAR)
+#pragma config(Sensor, S4,     IRSeeker,       sensorI2CCustom)
 #pragma config(Motor,  motorA,           ,             tmotorNXT, openLoop)
 #pragma config(Motor,  motorB,           ,             tmotorNXT, openLoop)
 #pragma config(Motor,  motorC,           ,             tmotorNXT, openLoop)
@@ -14,7 +14,7 @@
 #pragma config(Motor,  mtr_S1_C3_2,     flagMotor,     tmotorTetrix, openLoop)
 #pragma config(Servo,  srvo_S1_C4_1,    wrist,                tServoStandard)
 #pragma config(Servo,  srvo_S1_C4_2,    flagRaiserExtender,   tServoStandard)
-#pragma config(Servo,  srvo_S1_C4_3,    servo3,               tServoNone)
+#pragma config(Servo,  srvo_S1_C4_3,    blockPusher,          tServoStandard)
 #pragma config(Servo,  srvo_S1_C4_4,    servo4,               tServoNone)
 #pragma config(Servo,  srvo_S1_C4_5,    autoArm,              tServoStandard)
 #pragma config(Servo,  srvo_S1_C4_6,    autoBlock,            tServoStandard)
@@ -47,6 +47,8 @@ void leftSidePower(int power) {
 
 const int threshold = 10;
 int scaler = 6;
+bool flagRaiserExtended = false;
+int lastJoyButton10 = 0;
 
 void driver() {
 	// Function for the 1st gamepad that controls driving
@@ -119,14 +121,7 @@ void arm() {
 		wristAmount = 0;
 
 	int maxArmAmountPositive = 50;
-	int maxArmAmountNegative = -10;
-	if (joy1Btn(1) == 1) {
-		maxArmAmountPositive = 50;
-		//PlaySound(soundShortBlip);
-	}
-	else if (joy1Btn(2) == 1) {
-		maxArmAmountPositive = 80;
-	}
+	int maxArmAmountNegative = -3;
 
 	armAmount /= 4;
 	if (armAmount < maxArmAmountNegative)
@@ -141,43 +136,71 @@ void arm() {
 	if (wristAmount > 0)
 		degreeChange = 5;
 	servoChangeRate[wrist] = 50;
-	servoChangeRate[flagRaiserExtender] = 50;
+	//servoChangeRate[flagRaiserExtender] = 50;
 
 	servo[wrist] = ServoValue[wrist] - degreeChange;
 	//servo[flagRaiserExtender] = ServoValue[flagRaiserExtender] - degreeChange;
 
 	// Flag raiser
 	int flagMotorSpeed = 0;
-	if (joy2Btn(5) == 1) {
-		flagMotorSpeed = -25;
-	}
-	if (joy2Btn(6) == 1) {
+	if (joy2Btn(5) == 1 && flagRaiserExtended) {
 		flagMotorSpeed = -50;
 	}
+	if (joy2Btn(6) == 1 && flagRaiserExtended) {
+		flagMotorSpeed = 50;
+	}
 	motor[flagMotor] = flagMotorSpeed;
+
+
+	// Flag raiser extender
+	if (joy2Btn(10) == 1 && lastJoyButton10 == 0) {
+		if (flagRaiserExtended) {
+			// Retract the flag raiser
+			servo[flagRaiserExtender] = 220;
+		}
+		else {
+			// Extend the flag raiser
+			servo[flagRaiserExtender] = 0;
+		}
+		flagRaiserExtended = !flagRaiserExtended;
+	}
+	lastJoyButton10 = joy2Btn(10);
+
+	// Block pusher
+	if (joy2Btn(9) == 1) {
+		servo[blockPusher] = 0;
+	}
+	if (ServoValue[blockPusher] < 1) {
+		servo[blockPusher] = 360;
+	}
 }
 void datalogging() {
 	eraseDisplay();
+	// Some of this stuff causes the NXT and RobotC to freeze and crash. Idk what.
 	//int encoderValue = nMotorEncoder[armMotor];
 	//nxtDisplayTextLine(2, "Encoder: %d", encoderValue);
-	nxtDisplayTextLine(2, "Encoder: %s", "N/A");
-	nxtDisplayTextLine(4, "Wrist: %d", ServoValue[wrist]);
-	nxtDisplayTextLine(5, "Flag: %d", ServoValue[flagRaiserExtender]);
+	//nxtDisplayTextLine(2, "Encoder: %s", "N/A");
+	//nxtDisplayTextLine(4, "Wrist: %d", ServoValue[wrist]);
+	//nxtDisplayTextLine(5, "Flag: %d", ServoValue[flagRaiserExtender]);
+	nxtDisplayTextLine(7, "Pusher: %d", ServoValue[blockPusher]);
 }
 
 task main() {
 	servoChangeRate[flagRaiserExtender] = 5;
+	servoChangeRate[blockPusher] = 8;
+
 	servo[flagRaiserExtender] = 220;
 	servo[wrist] = 90;
+	servo[blockPusher] = 360;
 	waitForStart();
-	servo[flagRaiserExtender] = 0;
+	//servo[flagRaiserExtender] = 0;
 
 	while (true) {
 		bFloatDuringInactiveMotorPWM = false;
 		getJoystickSettings(joystick);
 		driver();
 		arm();
-		//datalogging();
+		datalogging();
 		// RobotC function for keeping the robot on
 		//alive();
 	}

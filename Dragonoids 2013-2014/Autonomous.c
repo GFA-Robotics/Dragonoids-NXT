@@ -1,8 +1,8 @@
 #pragma config(Hubs,  S1, HTMotor,  HTMotor,  HTMotor,  HTServo)
-#pragma config(Sensor, S1,     motorMux,       sensorNone)
-#pragma config(Sensor, S2,     IRSeeker,       sensorI2CCustom)
+#pragma config(Sensor, S1,     motorMux,       sensorI2CMuxController)
+#pragma config(Sensor, S2,     ultrasonic,     sensorSONAR)
 #pragma config(Sensor, S3,     gyroSensor,     sensorAnalogInactive)
-#pragma config(Sensor, S4,     ultrasonic,     sensorSONAR)
+#pragma config(Sensor, S4,     IRSeeker,       sensorI2CCustom)
 #pragma config(Motor,  motorA,           ,             tmotorNXT, openLoop)
 #pragma config(Motor,  motorB,           ,             tmotorNXT, openLoop)
 #pragma config(Motor,  motorC,           ,             tmotorNXT, openLoop)
@@ -14,7 +14,7 @@
 #pragma config(Motor,  mtr_S1_C3_2,     flagMotor,     tmotorTetrix, openLoop)
 #pragma config(Servo,  srvo_S1_C4_1,    wrist,                tServoStandard)
 #pragma config(Servo,  srvo_S1_C4_2,    flagRaiserExtender,   tServoStandard)
-#pragma config(Servo,  srvo_S1_C4_3,    servo3,               tServoNone)
+#pragma config(Servo,  srvo_S1_C4_3,    blockPusher,          tServoStandard)
 #pragma config(Servo,  srvo_S1_C4_4,    servo4,               tServoNone)
 #pragma config(Servo,  srvo_S1_C4_5,    autoArm,              tServoStandard)
 #pragma config(Servo,  srvo_S1_C4_6,    autoBlock,            tServoStandard)
@@ -33,14 +33,15 @@ void stopMotors() {
 	motor[rearLeft] = 0;
 	motor[rearRight] = 0;
 }
-void rightSidePower(int power) {
-	motor[frontRight] = power;
-	motor[rearRight] = power;
-}
 void leftSidePower(int power) {
 	motor[frontLeft] = power;
 	motor[rearLeft] = power;
 }
+void rightSidePower(int power) {
+	motor[frontRight] = power;
+	motor[rearRight] = power;
+}
+
 
 // Task for the gyro sensor which sets the global variable
 // heading on each update
@@ -72,12 +73,14 @@ task gyro() {
     heading += rotSpeed * 0.02;
 
     // Display our current heading on the screen
-    nxtDisplayCenteredTextLine(4, "%2.2f", heading);
+    eraseDisplay();
+    nxtDisplayCenteredBigTextLine(4, "%3.2f", heading);
 	}
 }
 task main() {
 	servoChangeRate[flagRaiserExtender] = 5;
 	servo[flagRaiserExtender] = 220;
+	servo[blockPusher] = 255;
 
 	servo[autoArm] = 1;
 	servo[autoBlock] = 200;
@@ -89,12 +92,13 @@ task main() {
   nxtDisplayTextLine(6, "Waiting for start...");
   PlaySound(soundUpwardTones);
 
-  //wait1Msec(1000);
-  waitForStart();
+  wait1Msec(5000);
+  //waitForStart();
   eraseDisplay();
   // Spawn the gyro heading task
   StartTask(gyro, kHighPriority);
-	const int power = 40;
+	const int power = 30;
+	const int turnPower = 20;
 
 	// -45 degrees
   /*while (heading > -15) {
@@ -113,13 +117,13 @@ task main() {
 		}
 		// If sensor is ahead of us
 		if (IRDir < 5) {
-			rightSidePower(power);
-			leftSidePower(power);
+			rightSidePower(-power);
+			leftSidePower(-power);
 		}
 		// If sensor is behind us for some reason
 		if (IRDir > 5) {
-			rightSidePower(-power);
-			leftSidePower(-power);
+			rightSidePower(power);
+			leftSidePower(power);
 		}
 		// Centered IR beacon
 		if (IRDir == 5) {
@@ -128,58 +132,52 @@ task main() {
 		}
 	}
 	long timeToFindIR = time1[T1];
-	// +90 degrees
-	heading = 0;
-	while (heading < 30) {
-  	rightSidePower(-power);
-  	leftSidePower(power);
-	}
+
 	// Place in bin
 	servoChangeRate[autoArm] = 2;
 	servoChangeRate[autoBlock] = 2;
-	const int autoArmMoveTo = 270;
+	const int autoArmMoveTo = 250;
 	const int autoBlockMoveTo = 1;
 	servo[autoArm] = autoArmMoveTo;
 	while (ServoValue[autoArm] < autoArmMoveTo) {
 		wait1Msec(20);
 	}
 	servo[autoBlock] = 1;
-	while (ServoValue[autoBlockMoveTo] < autoBlockMoveTo) {
+	while (ServoValue[autoBlock] > autoBlockMoveTo) {
+		eraseDisplay();
+		nxtDisplayCenteredTextLine(5, "BlockMoveTo: %d", ServoValue[autoBlock]);
 		wait1Msec(20);
 	}
-	// +90 degrees
-	heading = 0;
-	while (heading < 30) {
-  	rightSidePower(-power);
-  	leftSidePower(power);
-	}
+
 	// Retract arm
-	motor[armMotor] = -20;
-	wait1Msec(500);
-	motor[armMotor] = 0;
+	servo[autoArm] = 1;
+	servo[autoBlock] = 200;
 
 	// Drive forward same time it took to get to beacon
 	rightSidePower(power);
 	leftSidePower(power);
 	wait1Msec(timeToFindIR);
 	stopMotors();
+
 	// -90 degrees
 	heading = 0;
-	while (heading > -30) {
-  	rightSidePower(-power);
-  	leftSidePower(power);
+	while (heading > -25) {
+  	rightSidePower(power);
+  	leftSidePower(-power);
 	}
+	wait1Msec(1000);
 	// Forward a bit to line up with ramp
 	rightSidePower(power);
 	leftSidePower(power);
-	wait1Msec(2000);
+	wait1Msec(1500);
 	stopMotors();
  	// -90 degrees
 	heading = 0;
-	while (heading > -30) {
-  	rightSidePower(-power);
-  	leftSidePower(power);
+	while (heading > -25) {
+  	rightSidePower(power);
+  	leftSidePower(-power);
 	}
+	wait1Msec(1000);
  	// Forward time it takes to get to ramp
 	rightSidePower(power);
 	leftSidePower(power);
