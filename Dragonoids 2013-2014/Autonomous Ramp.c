@@ -96,8 +96,8 @@ task main() {
   nxtDisplayTextLine(6, "Waiting for start...");
   PlaySound(soundUpwardTones);
 
-  wait1Msec(5000);
- 	//waitForStart();
+  //wait1Msec(5000);
+ 	waitForStart();
   eraseDisplay();
   // Spawn the gyro heading task
   StartTask(gyro, kHighPriority);
@@ -106,18 +106,18 @@ task main() {
 
 	rightSidePower(-power);
 	leftSidePower(-power);
-	wait1Msec(1200);
+	wait1Msec(1100);
 	stopMotors();
 
 	// -45 degrees
-  while (heading < 14) {
+  while (heading < 13) {
   	rightSidePower(-turnPower);
   	leftSidePower(turnPower);
 	}
 
 	rightSidePower(-power);
 	leftSidePower(-power);
-	wait1Msec(1700);
+	wait1Msec(1500);
 	stopMotors();
 
 	// Drop a block
