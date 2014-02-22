@@ -39,39 +39,54 @@ PROGMEM const unsigned long PatternOff[1][10]={
   {0x000000,0x000000,0x000000,0x000000,0x000000,0x000000,0x000000,0x000000,0x000000,0x000000}
 };
 
+const int switchPin = 2;
+int lastSwitchState = HIGH;
+int stripState = 0;
+int lastStripState = 0;
 
-// ***********************************************************************************************************
-// *
-// *                            Power Up Init.
-// *
-// *
-// ***********************************************************************************************************
 void setup() {                
 
-  STRIP_PINOUT;        // set output pin - DEBUG: should auto detect which mother board for use
+  STRIP_PINOUT;
 
   reset_strip();
   //noInterrupts();
-
+  Serial.begin(9600);
+  pinMode(switchPin, INPUT);
 }
-
-
-
-// ***********************************************************************************************************
-// *
-// *                            Main Loop 
-// *
-// *
-// ***********************************************************************************************************
 void loop() 
 {
-
-  send_pattern(PatternRed, 1, 500);
-  delay(1000);
-  send_pattern(PatternBlue, 1, 500);
-  delay(1000);
-  send_pattern(PatternOff, 1, 500);
-  delay(1000);
+  
+  int switchState = digitalRead(switchPin);
+  
+  if (switchState == LOW && lastSwitchState == HIGH) {
+    // Switch is pushed forward
+    stripState++;
+    if (stripState > 2) {
+      stripState = 0;
+    }
+    Serial.println(stripState);
+    lastSwitchState = LOW;
+  }
+  
+  switch (stripState) {
+    case 0:
+      if (stripState != lastStripState) {
+        send_pattern(PatternOff, 1, 100);
+        delay(100);
+      }
+      else {
+        send_pattern(PatternOff, 1, 1);
+      }
+      break;
+    case 1:
+      send_pattern(PatternRed, 1, 1);
+      break;
+    case 2:
+      send_pattern(PatternBlue, 1, 1);
+      break;
+  }
+  lastSwitchState = switchState;
+  lastStripState = stripState;
 }
 
 
