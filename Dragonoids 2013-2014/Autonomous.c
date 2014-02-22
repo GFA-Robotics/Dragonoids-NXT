@@ -97,7 +97,7 @@ task main() {
   PlaySound(soundUpwardTones);
 
   wait1Msec(5000);
- 	//waitForStart();
+ 	waitForStart();
   eraseDisplay();
   // Spawn the gyro heading task
   StartTask(gyro, kHighPriority);
