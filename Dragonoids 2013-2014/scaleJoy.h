@@ -1,4 +1,3 @@
-
 #define button1	   0x01
 #define button2	   0x02
 #define button3	   0x04

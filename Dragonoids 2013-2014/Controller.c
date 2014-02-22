@@ -55,27 +55,24 @@ void driver() {
 	// Function for the 1st gamepad that controls driving
 	// Joystick values are 8 bit signed ints (-127 to 128) of the data type byte
 
-	// Variable speeds
-
-
 	// Turning in place
-	//if (joy1Btn(5) == 1) {
-	//	// Counter clockwise turn
-	//	int powerLevel = 128 / scaler;
-	//	rightSidePower(powerLevel);
-	//	leftSidePower(-powerLevel);
-	//	return;
-	//}
-	//if (joy1Btn(6) == 1) {
-	//	// Clockwise turn
-	//	int powerLevel = 128 / scaler;
-	//	rightSidePower(-powerLevel);
-	//	leftSidePower(powerLevel);
-	//	return;
-	//}
+	if (joy1Btn(5) == 1) {
+		// Counter clockwise turn
+		int powerLevel = 128 / scaler;
+		rightSidePower(powerLevel);
+		leftSidePower(-powerLevel);
+		return;
+	}
+	if (joy1Btn(6) == 1) {
+		// Clockwise turn
+		int powerLevel = 128 / scaler;
+		rightSidePower(-powerLevel);
+		leftSidePower(powerLevel);
+		return;
+	}
 
-	int forwardAmount = 0.65*scaleJoy(joystick.joy1_y1);
-	int turningAmount = 0.8*scaleJoy(joystick.joy1_x2);
+	int forwardAmount = 0.65 * scaleJoy(joystick.joy1_y1);
+	int turningAmount = 0.8 * scaleJoy(joystick.joy1_x2);
 	//if (abs(forwardAmount) < threshold)
 	//	forwardAmount = 0;
 	//if (abs(turningAmount) < threshold)
@@ -83,8 +80,8 @@ void driver() {
 	//forwardAmount /= scaler;
 	//turningAmount /= scaler;
 
-	leftSidePower(-(forwardAmount-turningAmount));
-	rightSidePower(-(forwardAmount+turningAmount));
+	leftSidePower(-(forwardAmount - turningAmount));
+	rightSidePower(-(forwardAmount + turningAmount));
 
 	//int rightWheelSpeed = forwardAmount;
 	//int leftWheelSpeed = forwardAmount;
