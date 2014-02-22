@@ -3,4 +3,6 @@ Dragonoids
 
 GFA Robotics
 
-_Note: Code for the new robot design is currently in the NewRobot branch. Do **not** commit code for the new robot into the master branch until a pull request has been submitted and approved and NewRobot is merged into the master branch_
+_Code for the new robot has now been merged into master_
+
+_The code from I^2 Robotics is now in the I2Robotics branch_
