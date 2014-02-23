@@ -3,8 +3,8 @@
 #pragma config(Sensor, S2,     ultrasonic,     sensorSONAR)
 #pragma config(Sensor, S3,     gyroSensor,     sensorAnalogInactive)
 #pragma config(Sensor, S4,     IRSeeker,       sensorI2CCustom)
-#pragma config(Motor,  motorA,           ,             tmotorNXT, openLoop)
-#pragma config(Motor,  motorB,           ,             tmotorNXT, openLoop)
+#pragma config(Motor,  motorA,          blockMotor1,   tmotorNXT, openLoop, reversed)
+#pragma config(Motor,  motorB,          blockMotor2,   tmotorNXT, openLoop)
 #pragma config(Motor,  motorC,           ,             tmotorNXT, openLoop)
 #pragma config(Motor,  mtr_S1_C1_1,     rearRight,     tmotorTetrix, openLoop)
 #pragma config(Motor,  mtr_S1_C1_2,     rearLeft,      tmotorTetrix, openLoop, reversed)
@@ -150,11 +150,18 @@ void arm() {
 	lastJoyButton10 = joy2Btn(10);
 
 	// Block pusher
-	if (joy2Btn(9) == 1) {
-		servo[blockPusher] = 0;
+	const int speedPusher = 100;
+	if (joy2Btn(7) == 1) {
+		motor[blockMotor1] = speedPusher;
+		motor[blockMotor2] = speedPusher;
 	}
-	if (ServoValue[blockPusher] < 1) {
-		servo[blockPusher] = 360;
+	else if (joy2Btn(8) == 1) {
+		motor[blockMotor1] = -speedPusher;
+		motor[blockMotor2] = -speedPusher;
+	}
+	else {
+		motor[blockMotor1] = 0;
+		motor[blockMotor2] = 0;
 	}
 }
 void datalogging() {
