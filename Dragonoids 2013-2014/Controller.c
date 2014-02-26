@@ -71,8 +71,8 @@ void driver() {
 		return;
 	}
 
-	int forwardAmount = 0.65 * scaleJoy(joystick.joy1_y1);
-	int turningAmount = 0.8 * scaleJoy(joystick.joy1_x2);
+	int forwardAmount = 0.4 * scaleJoy(joystick.joy1_y1);
+	int turningAmount = 0.4 * scaleJoy(joystick.joy1_x2);
 	//if (abs(forwardAmount) < threshold)
 	//	forwardAmount = 0;
 	//if (abs(turningAmount) < threshold)
@@ -103,17 +103,10 @@ void arm() {
 	if (abs(wristAmount) < threshold)
 		wristAmount = 0;
 
-	int maxArmAmountPositive = 50;
-	int maxArmAmountNegative = -3;
-
-	armAmount /= 4;
-	if (armAmount < maxArmAmountNegative)
-		armAmount = maxArmAmountNegative;
-	if (armAmount > maxArmAmountPositive)
-		armAmount = maxArmAmountPositive;
+	armAmount /= 2;
 	motor[armMotor] = armAmount;
 
-	int degreeChange = 0;
+	/*int degreeChange = 0;
 	if (wristAmount < 0)
 		degreeChange = -5;
 	if (wristAmount > 0)
@@ -123,6 +116,7 @@ void arm() {
 
 	servo[wrist] = ServoValue[wrist] - degreeChange;
 	//servo[flagRaiserExtender] = ServoValue[flagRaiserExtender] - degreeChange;
+	*/
 
 	// Flag raiser
 	int flagMotorSpeed = 0;
@@ -150,7 +144,7 @@ void arm() {
 	lastJoyButton10 = joy2Btn(10);
 
 	// Block pusher
-	const int speedPusher = 100;
+	const int speedPusher = 80;
 	if (joy2Btn(7) == 1) {
 		motor[blockMotor1] = speedPusher;
 		motor[blockMotor2] = speedPusher;
