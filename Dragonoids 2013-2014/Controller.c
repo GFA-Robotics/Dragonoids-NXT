@@ -14,7 +14,7 @@
 #pragma config(Motor,  mtr_S1_C3_2,     flagMotor,     tmotorTetrix, openLoop)
 #pragma config(Servo,  srvo_S1_C4_1,    wrist,                tServoStandard)
 #pragma config(Servo,  srvo_S1_C4_2,    flagRaiserExtender,   tServoStandard)
-#pragma config(Servo,  srvo_S1_C4_3,    blockPusher,          tServoStandard)
+#pragma config(Servo,  srvo_S1_C4_3,    blockBlocker,         tServoStandard)
 #pragma config(Servo,  srvo_S1_C4_4,    servo4,               tServoNone)
 #pragma config(Servo,  srvo_S1_C4_5,    autoArm,              tServoStandard)
 #pragma config(Servo,  srvo_S1_C4_6,    autoBlock,            tServoStandard)
@@ -98,25 +98,23 @@ void arm() {
 	int armAmount = joystick.joy2_y1;
 	int wristAmount = joystick.joy2_y2;
 
-	if (abs(armAmount) < threshold)
-		armAmount = 0;
+	//if (abs(armAmount) < threshold)
+	//	armAmount = 0;
 	if (abs(wristAmount) < threshold)
 		wristAmount = 0;
 
-	armAmount /= 2;
+	armAmount = scaleJoy(armAmount);
 	motor[armMotor] = armAmount;
 
-	/*int degreeChange = 0;
+	int degreeChange = 0;
 	if (wristAmount < 0)
 		degreeChange = -5;
 	if (wristAmount > 0)
 		degreeChange = 5;
-	servoChangeRate[wrist] = 50;
-	//servoChangeRate[flagRaiserExtender] = 50;
+	servoChangeRate[blockBlocker] = 50;
 
-	servo[wrist] = ServoValue[wrist] - degreeChange;
+	servo[blockBlocker] = ServoValue[blockBlocker] + degreeChange;
 	//servo[flagRaiserExtender] = ServoValue[flagRaiserExtender] - degreeChange;
-	*/
 
 	// Flag raiser
 	int flagMotorSpeed = 0;
@@ -166,16 +164,16 @@ void datalogging() {
 	//nxtDisplayTextLine(2, "Encoder: %s", "N/A");
 	//nxtDisplayTextLine(4, "Wrist: %d", ServoValue[wrist]);
 	//nxtDisplayTextLine(5, "Flag: %d", ServoValue[flagRaiserExtender]);
-	nxtDisplayTextLine(7, "Pusher: %d", ServoValue[blockPusher]);
+	nxtDisplayTextLine(7, "Pusher: %d", ServoValue[blockBlocker]);
 }
 
 task main() {
 	servoChangeRate[flagRaiserExtender] = 5;
-	servoChangeRate[blockPusher] = 8;
+	servoChangeRate[blockBlocker] = 8;
 
 	servo[flagRaiserExtender] = 220;
 	servo[wrist] = 90;
-	servo[blockPusher] = 360;
+	servo[blockBlocker] = 250;
 	waitForStart();
 	//servo[flagRaiserExtender] = 0;
 
