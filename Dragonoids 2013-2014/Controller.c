@@ -1,9 +1,9 @@
 #pragma config(Hubs,  S1, HTMotor,  HTMotor,  HTMotor,  HTServo)
-#pragma config(Sensor, S1,     motorMux,       sensorI2CMuxController)
+#pragma config(Sensor, S1,     motorMux,       sensorNone)
 #pragma config(Sensor, S2,     ultrasonic,     sensorSONAR)
 #pragma config(Sensor, S3,     gyroSensor,     sensorAnalogInactive)
 #pragma config(Sensor, S4,     IRSeeker,       sensorI2CCustom)
-#pragma config(Motor,  motorA,          blockMotor1,   tmotorNXT, openLoop, reversed)
+#pragma config(Motor,  motorA,          blockMotor1,   tmotorNXT, openLoop)
 #pragma config(Motor,  motorB,          blockMotor2,   tmotorNXT, openLoop)
 #pragma config(Motor,  motorC,           ,             tmotorNXT, openLoop)
 #pragma config(Motor,  mtr_S1_C1_1,     rearRight,     tmotorTetrix, openLoop)
@@ -47,7 +47,7 @@ void leftSidePower(int power) {
 }
 
 const int threshold = 10;
-int scaler = 6;
+float scaler = 0.4;
 bool flagRaiserExtended = false;
 int lastJoyButton10 = 0;
 
@@ -55,24 +55,34 @@ void driver() {
 	// Function for the 1st gamepad that controls driving
 	// Joystick values are 8 bit signed ints (-127 to 128) of the data type byte
 
+	// Power levels
+	if (joy1Btn(1))
+		scaler = 0.4;
+	if (joy1Btn(2))
+		scaler = 2.0;
+	if (joy1Btn(3))
+		scaler = 3.0;
+	if (joy1Btn(4))
+		scaler = 4.0;
+
 	// Turning in place
 	if (joy1Btn(5) == 1) {
 		// Counter clockwise turn
-		int powerLevel = 128 / scaler;
+		int powerLevel = 128 / 6;
 		rightSidePower(powerLevel);
 		leftSidePower(-powerLevel);
 		return;
 	}
 	if (joy1Btn(6) == 1) {
 		// Clockwise turn
-		int powerLevel = 128 / scaler;
+		int powerLevel = 128 / 6;
 		rightSidePower(-powerLevel);
 		leftSidePower(powerLevel);
 		return;
 	}
 
-	int forwardAmount = 0.4 * scaleJoy(joystick.joy1_y1);
-	int turningAmount = 0.4 * scaleJoy(joystick.joy1_x2);
+	int forwardAmount = scaler * scaleJoy(joystick.joy1_y1);
+	int turningAmount = scaler * scaleJoy(joystick.joy1_x2);
 	//if (abs(forwardAmount) < threshold)
 	//	forwardAmount = 0;
 	//if (abs(turningAmount) < threshold)
@@ -144,12 +154,12 @@ void arm() {
 	// Block pusher
 	const int speedPusher = 80;
 	if (joy2Btn(7) == 1) {
-		motor[blockMotor1] = speedPusher;
-		motor[blockMotor2] = speedPusher;
-	}
-	else if (joy2Btn(8) == 1) {
 		motor[blockMotor1] = -speedPusher;
 		motor[blockMotor2] = -speedPusher;
+	}
+	else if (joy2Btn(8) == 1) {
+		motor[blockMotor1] = speedPusher;
+		motor[blockMotor2] = speedPusher;
 	}
 	else {
 		motor[blockMotor1] = 0;
@@ -173,7 +183,10 @@ task main() {
 
 	servo[flagRaiserExtender] = 220;
 	servo[wrist] = 90;
-	servo[blockBlocker] = 250;
+	servo[blockBlocker] = 30;
+
+	servo[autoArm] = 145;
+	servo[autoBlock] = 200;
 	waitForStart();
 	//servo[flagRaiserExtender] = 0;
 
