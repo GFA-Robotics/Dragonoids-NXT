@@ -89,6 +89,7 @@ task main() {
 	waitForStart();
 	//servo[flagRaiserExtender] = 0;
 	*/
+	waitForStart();
 
 	while (true) {
 		bFloatDuringInactiveMotorPWM = false;
