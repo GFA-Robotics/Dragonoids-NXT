@@ -34,12 +34,12 @@ void stopMotors() {
 	motor[rearRight] = 0;
 }
 void leftSidePower(int power) {
-	motor[frontLeft] = power;
-	motor[rearLeft] = power;
+	motor[frontLeft] = -power;
+	motor[rearLeft] = -power;
 }
 void rightSidePower(int power) {
-	motor[frontRight] = power;
-	motor[rearRight] = power;
+	motor[frontRight] = -power;
+	motor[rearRight] = -power;
 }
 
 

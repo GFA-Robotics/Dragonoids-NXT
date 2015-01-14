@@ -1,10 +1,10 @@
 #pragma config(Hubs,  S1, HTMotor,  HTMotor,  HTMotor,  HTServo)
-#pragma config(Sensor, S1,     motorMux,       sensorI2CMuxController)
+#pragma config(Sensor, S1,     motorMux,       sensorNone)
 #pragma config(Sensor, S2,     ultrasonic,     sensorSONAR)
 #pragma config(Sensor, S3,     gyroSensor,     sensorAnalogInactive)
 #pragma config(Sensor, S4,     IRSeeker,       sensorI2CCustom)
-#pragma config(Motor,  motorA,           ,             tmotorNXT, openLoop)
-#pragma config(Motor,  motorB,           ,             tmotorNXT, openLoop)
+#pragma config(Motor,  motorA,          blockMotor1,   tmotorNXT, openLoop)
+#pragma config(Motor,  motorB,          blockMotor2,   tmotorNXT, openLoop)
 #pragma config(Motor,  motorC,           ,             tmotorNXT, openLoop)
 #pragma config(Motor,  mtr_S1_C1_1,     rearRight,     tmotorTetrix, openLoop)
 #pragma config(Motor,  mtr_S1_C1_2,     rearLeft,      tmotorTetrix, openLoop, reversed)
@@ -14,7 +14,7 @@
 #pragma config(Motor,  mtr_S1_C3_2,     flagMotor,     tmotorTetrix, openLoop)
 #pragma config(Servo,  srvo_S1_C4_1,    wrist,                tServoStandard)
 #pragma config(Servo,  srvo_S1_C4_2,    flagRaiserExtender,   tServoStandard)
-#pragma config(Servo,  srvo_S1_C4_3,    blockPusher,          tServoStandard)
+#pragma config(Servo,  srvo_S1_C4_3,    blockBlocker,         tServoStandard)
 #pragma config(Servo,  srvo_S1_C4_4,    servo4,               tServoNone)
 #pragma config(Servo,  srvo_S1_C4_5,    autoArm,              tServoStandard)
 #pragma config(Servo,  srvo_S1_C4_6,    autoBlock,            tServoStandard)
@@ -83,10 +83,10 @@ task main() {
 	servoChangeRate[autoArm] = 3;
 
 	servo[flagRaiserExtender] = 220;
-	servo[blockPusher] = 255;
 	servo[wrist] = 200;
+	servo[blockBlocker] = 30;
 
-	servo[autoArm] = 1;
+	servo[autoArm] = 40;
 	servo[autoBlock] = 200;
 
 	// Calibrate the gyro, make sure you hold the sensor still
@@ -96,8 +96,8 @@ task main() {
   nxtDisplayTextLine(6, "Waiting for start...");
   PlaySound(soundUpwardTones);
 
-  wait1Msec(5000);
- 	//waitForStart();
+  //wait1Msec(5000);
+ 	waitForStart();
   eraseDisplay();
   // Spawn the gyro heading task
   StartTask(gyro, kHighPriority);
@@ -118,8 +118,8 @@ task main() {
 		initialMoveTime = 1000;
 	}
 
-	rightSidePower(-power);
-	leftSidePower(-power);
+	rightSidePower(power);
+	leftSidePower(power);
 	wait1Msec(initialMoveTime);
 	stopMotors();
 
@@ -143,13 +143,13 @@ task main() {
 		}
 		// If sensor is ahead of us
 		if (IRDir < 5) {
-			rightSidePower(-power);
-			leftSidePower(-power);
+			rightSidePower(power);
+			leftSidePower(power);
 		}
 		// If sensor is behind us for some reason
 		if (IRDir > 5) {
-			rightSidePower(power);
-			leftSidePower(power);
+			rightSidePower(-power);
+			leftSidePower(-power);
 		}
 		// Centered IR beacon
 		if (IRDir == 5) {
@@ -183,16 +183,16 @@ task main() {
 		wait1Msec(20);
 	}
 	// Drive forward same time it took to get to beacon
-	rightSidePower(power);
-	leftSidePower(power);
+	rightSidePower(-power);
+	leftSidePower(-power);
 	wait1Msec(timeToFindIR + initialMoveTime);
 	stopMotors();
 
 	wait1Msec(1000);
 	// -90 degrees
-	while (heading > -18) {
-  	rightSidePower(turnPower);
-  	leftSidePower(-turnPower);
+	while (heading < 40) {
+  	rightSidePower(-turnPower);
+  	leftSidePower(turnPower);
 	}
 	stopMotors();
 	wait1Msec(1000);
@@ -203,16 +203,16 @@ task main() {
 	stopMotors();
  	// +90 degrees
 	wait1Msec(1000);
-	while (heading < 0) {
-  	rightSidePower(-turnPower);
-  	leftSidePower(turnPower);
+	while (heading > 10) {
+  	rightSidePower(turnPower + 30);
+  	leftSidePower(-(turnPower));
 	}
 	stopMotors();
 	wait1Msec(1000);
  	// Backward time it takes to get to ramp
-	rightSidePower(-power);
-	leftSidePower(-power);
-	wait1Msec(2000);
+	rightSidePower(power);
+	leftSidePower(power);
+	wait1Msec(3500);
 	stopMotors();
 
 	PlaySound(soundDownwardTones);
