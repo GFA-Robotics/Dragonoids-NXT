@@ -80,8 +80,55 @@ void driver() {
 	}
 }
 
-void arm() {
+int rightLiftPosition = 0;
+int leftLiftPosition = 0;
 
+void arm() {
+	// Raise the lift when button 8 is pressed and lower it when button 7 is pressed
+	const short msLockout = 10;
+	if (time1[T1] < msLockout)
+		return;
+	ClearTimer(T1);
+
+	if (joy2Btn(8) == 1) {
+		rightLiftPosition++;
+		leftLiftPosition++;
+	}
+	else if (joy2Btn(7) == 1) {
+		rightLiftPosition--;
+		leftLiftPosition--;
+	}
+}
+
+const float kp = 0.0; // Proportional gain (for correcting current error)
+const float ki = 0.0; // Integral gain (for measuring past error)
+const float kd = 0.0; // Derivative gain (for predicting to future error)
+
+float rightErrorSum = 0;
+float rightLastError = 0;
+task maintainRightLiftLevel() {
+	int currentRightPosition = nMotorEncoder[rightLift];
+
+	int deltaTime = time1[T2];
+	float error = rightLiftPosition - currentRightPosition;
+	rightErrorSum += (error * deltaTime);
+	float dError = (error - rightLastError) / deltaTime;
+	motor[rightLift] = kp * error + ki * rightErrorSum + kd * dError;
+	rightLastError = error;
+	ClearTimer(T2);
+}
+float leftErrorSum = 0;
+float leftLastError = 0;
+task maintainLeftLiftLevel() {
+	int currentLeftPosition = nMotorEncoder[leftLift];
+
+	int deltaTime = time1[T3];
+	float error = leftLiftPosition - currentLeftPosition;
+	leftErrorSum += (error * deltaTime);
+	float dError = (error - leftLastError) / deltaTime;
+	motor[rightLift] = kp * error + ki * leftErrorSum + kd * dError;
+	leftLastError = error;
+	ClearTimer(T3);
 }
 
 task main() {
@@ -99,6 +146,15 @@ task main() {
 	//servo[flagRaiserExtender] = 0;
 	*/
 	waitForStart();
+
+	// Reset the lift motor encoders
+	nMotorEncoder[rightLift] = 0;
+	nMotorEncoder[leftLift] = 0;
+	StartTask(maintainRightLiftLevel, kDefaultTaskPriority);
+	StartTask(maintainLeftLiftLevel, kDefaultTaskPriority);
+	ClearTimer(T1);
+	ClearTimer(T2);
+	ClearTimer(T3);
 
 	while (true) {
 		bFloatDuringInactiveMotorPWM = false;
