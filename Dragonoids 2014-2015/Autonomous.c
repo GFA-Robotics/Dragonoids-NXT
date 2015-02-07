@@ -106,6 +106,7 @@ task main() {
 	applyRightSidePower(power);
 	applyLeftSidePower(power);
 	wait1Msec(advanceMilliseconds);
+	stopMotors();
 	// Lift the arm
 
 
