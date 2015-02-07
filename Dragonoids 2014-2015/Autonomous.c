@@ -90,7 +90,9 @@ task main() {
   PlaySound(soundUpwardTones);
   // Open the hopper for a ball to be placed in
 
-
+  // Initialize servos
+	servo[tilt] = 110;
+	servo[collectingDoor] = 100;
   //wait1Msec(5000);
  	waitForStart();
   eraseDisplay();
