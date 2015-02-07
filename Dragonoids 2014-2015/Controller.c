@@ -89,6 +89,7 @@ const int tiltPositionStart = 110;
 const int doorPositionStart = 100;
 int tiltPosition = tiltPositionStart;
 int doorPosition = doorPositionStart;
+bool collectorSpinning = false;
 
 void arm() {
 	const int upPower = 55;
@@ -125,6 +126,18 @@ void arm() {
 	}
 	servo[tilt] = tiltPosition;
 	servo[collectingDoor] = doorPosition;
+
+	// Spin the ball collector
+	if (joy2Btn(2) == 1 && time1[T1] > 100) {
+		collectorSpinning = !collectorSpinning;
+		ClearTimer(T1);
+	}
+	if (collectorSpinning) {
+		motor[sweeper] = 50;
+	}
+	else {
+		motor[sweeper] = 0;
+	}
 }
 
 task main() {
