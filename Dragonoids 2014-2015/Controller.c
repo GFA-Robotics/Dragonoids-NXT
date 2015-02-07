@@ -86,7 +86,7 @@ void driver() {
 }
 
 const int tiltPositionStart = 110;
-const int doorPositionStart = 100;
+const int doorPositionStart = 110;
 int tiltPosition = tiltPositionStart;
 int doorPosition = doorPositionStart;
 bool collectorSpinning = false;
@@ -130,11 +130,17 @@ void arm() {
 	}
 	if (joystick.joy2_TopHat == 2) {
 		// Right
-		doorPosition++;
+		doorPosition--;
 	}
 	if (joystick.joy2_TopHat == 6) {
 		// Left
-		doorPosition--;
+		doorPosition++;
+	}
+	if (doorPosition < doorPositionStart) {
+		doorPosition = doorPositionStart;
+	}
+	if (doorPosition > 255) {
+		doorPosition = 255;
 	}
 	servo[tilt] = tiltPosition;
 	servo[collectingDoor] = doorPosition;
