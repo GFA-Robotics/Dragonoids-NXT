@@ -85,6 +85,11 @@ void driver() {
 	}
 }
 
+const int tiltPositionStart = 110;
+const int doorPositionStart = 100;
+int tiltPosition = tiltPositionStart;
+int doorPosition = doorPositionStart;
+
 void arm() {
 	const int upPower = 55;
 	const int downPower = -30;
@@ -101,6 +106,25 @@ void arm() {
 		motor[rightLift] = 0;
 		motor[leftLift] = 0;
 	}
+	// Use the D-pad for the tilt and door mechanisms
+	if (joystick.joy2_TopHat == 0) {
+		// Up
+		tiltPosition++;
+	}
+	if (joystick.joy2_TopHat == 4) {
+		// Down
+		tiltPosition--;
+	}
+	if (joystick.joy2_TopHat == 2) {
+		// Right
+		doorPosition++;
+	}
+	if (joystick.joy2_TopHat == 6) {
+		// Left
+		doorPosition--;
+	}
+	servo[tilt] = tiltPosition;
+	servo[collectingDoor] = doorPosition;
 }
 
 task main() {
@@ -109,11 +133,12 @@ task main() {
 	servoChangeRate[blockBlocker] = 8;
 	*/
 	// Set initial positions of the various servo motors
-	servo[tilt] = 110;
-	servo[collectingDoor] = 100;
-	servo[depositDoor] = 0;
-	servo[rightGrabber] = 0;
-	servo[leftGrabber] = 0;
+	servo[tilt] = tiltPositionStart;
+	servo[collectingDoor] = doorPositionStart;
+	//servo[depositDoor] = 0;
+	// Not implemented yet
+	//servo[rightGrabber] = 0;
+	//servo[leftGrabber] = 0;
 	bFloatDuringInactiveMotorPWM = false;
 	waitForStart();
 
