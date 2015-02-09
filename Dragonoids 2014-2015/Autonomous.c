@@ -92,7 +92,7 @@ task main() {
 
   // Initialize servos
 	servo[tilt] = 110;
-	servo[collectingDoor] = 100;
+	servo[collectingDoor] = 255;
 	servo[leftGrabber] = 255;
 	servo[rightGrabber] = 0;
   //wait1Msec(5000);
