@@ -78,6 +78,24 @@ void driver() {
 	applyLeftSidePower(leftSidePower);
 	applyRightSidePower(rightSidePower);
 
+	// Raise and lower the tube-grabbing claws with the top pair of bumperss
+	if (joy1Btn(6) == 1) {
+		// Raise the claws
+		servo[leftGrabber] = ServoValue[leftGrabber] - 1;
+		servo[rightGrabber] = ServoValue[rightGrabber] + 1;
+	}
+	else if (joy1Btn(5) == 1) {
+		// Lower the claws
+		servo[leftGrabber] = ServoValue[leftGrabber] + 1;
+		servo[rightGrabber] = ServoValue[rightGrabber] - 1;
+	}
+	if (ServoValue[leftGrabber] > 128) {
+		servo[leftGrabber] = 128;
+	}
+	if (ServoValue[rightGrabber] < 128) {
+		servo[rightGrabber] = 128;
+	}
+
 	if (debug) {
 		eraseDisplay();
 		nxtDisplayString(4, "Right: %d", rightSidePower);
@@ -106,17 +124,6 @@ void arm() {
 	else {
 		motor[rightLift] = 0;
 		motor[leftLift] = 0;
-	}
-	// Raise and lower the tube-grabbing claws with the top pair of bumperss
-	if (joy2Btn(6) == 1) {
-		// Raise the claws
-		servo[leftGrabber] = ServoValue[leftGrabber] - 1;
-		servo[rightGrabber] = ServoValue[rightGrabber] + 1;
-	}
-	else if (joy2Btn(5) == 1) {
-		// Lower the claws
-		servo[leftGrabber] = ServoValue[leftGrabber] + 1;
-		servo[rightGrabber] = ServoValue[rightGrabber] - 1;
 	}
 
 	// Use the D-pad for the tilt and door mechanisms
@@ -168,6 +175,9 @@ task main() {
 	servo[collectingDoor] = doorPositionStart;
 	servo[leftGrabber] = 0;
 	servo[rightGrabber] = 255;
+	servoChangeRate[leftGrabber] = 100;
+	servoChangeRate[rightGrabber] = 100;
+	servoChangeRate[tilt] = 5;
 	//servo[depositDoor] = 0;
 	// Not implemented yet
 	//servo[rightGrabber] = 0;
