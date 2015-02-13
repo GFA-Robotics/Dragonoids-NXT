@@ -26,6 +26,7 @@
 #include "JoystickDriver.c"
 #include "drivers/hitechnic-irseeker-v2.h"
 #include "drivers/hitechnic-gyro.h"
+#include "PID.h"
 
 float heading = 0;
 const int power = 40;
