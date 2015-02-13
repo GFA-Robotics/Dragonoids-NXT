@@ -28,6 +28,8 @@
 #include "drivers/hitechnic-gyro.h"
 
 float heading = 0;
+const int power = 40;
+const int turnPower = 25;
 
 // Motor control functions
 void stopMotors() {
@@ -43,6 +45,34 @@ void applyRightSidePower(int power) {
 void applyLeftSidePower(int power) {
 	motor[frontLeft] = power;
 	motor[backLeft] = power;
+}
+void goForward(int forwardTime) {
+	applyRightSidePower(power);
+	applyLeftSidePower(power);
+	wait1Msec(forwardTime);
+	stopMotors();
+}
+void goBackward(int backwardTime) {
+	applyRightSidePower(-power);
+	applyLeftSidePower(-power);
+	wait1Msec(backwardTime);
+	stopMotors();
+}
+void turnRight(int desiredRelativeHeading) {
+	// Move left side motors forward and right side motors backwards
+	float relativeHeadingOffset = heading;
+	applyLeftSidePower(turnPower);
+	applyRightSidePower(-turnPower);
+	while (abs(heading - relativeHeadingOffset) < desiredRelativeHeading) {}
+	stopMotors();
+}
+void turnLeft(int desiredRelativeHeading) {
+	// Move right side motors forward and left side motors backwards
+	float relativeHeadingOffset = heading;
+	applyLeftSidePower(-turnPower);
+	applyRightSidePower(turnPower);
+	while (abs(heading - relativeHeadingOffset) < desiredRelativeHeading) {}
+	stopMotors();
 }
 
 // Task for the gyro sensor which sets the global variable
@@ -85,7 +115,6 @@ task main() {
 	// Calibrate the gyro, make sure you hold the sensor still
   HTGYROstartCal(gyroSensor);
   nxtDisplayTextLine(4, "Gyro calibration completed");
-
   nxtDisplayTextLine(6, "Waiting for start...");
   PlaySound(soundUpwardTones);
   // Open the hopper for a ball to be placed in
