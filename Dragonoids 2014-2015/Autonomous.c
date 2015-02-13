@@ -146,6 +146,14 @@ task main() {
 	servo[leftGrabber] = 128;
 	servo[rightGrabber] = 128;
 	while(ServoValue[rightGrabber] > 128 + servoMeasuringThreshold && ServoValue[leftGrabber] < (128 - servoMeasuringThreshold)) {}
-	// Lift the arm
+	// Place a ball in this tube (?)
+	// Move tube to scoring zone
+	const int turnDegrees = 35;
+	turnRight(turnDegrees);
+	// Backwards to scoring zone
+	const int moveToScoringZoneTime = 3000;
+	goBackward(moveToScoringZoneTime);
 
+	PlaySound(soundUpwardTones);
+	wait1Msec(1000);
 }
