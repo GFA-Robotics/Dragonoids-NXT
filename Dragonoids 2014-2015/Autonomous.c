@@ -83,7 +83,7 @@ task gyro() {
 
   // Reset the timer
   // USES TIMER 4
-  // DO NOT USE TIMER 4 ELSEWHERE IN THIS PROGRAM
+  // DO NOT USE TIMER 4 ELSEWHERE IN THIS PROGRAM; THINGS WILL EXPLODE AND ROBOT WILL BROKE
   time1[T4] = 0;
   while (true)
   {
@@ -122,23 +122,30 @@ task main() {
   // Initialize servos
 	servo[tilt] = 110;
 	servo[collectingDoor] = 255;
+	// Retracted
 	servo[leftGrabber] = 255;
 	servo[rightGrabber] = 0;
-  //wait1Msec(5000);
  	waitForStart();
   eraseDisplay();
   // Spawn the gyro heading task
   StartTask(gyro, kHighPriority);
-	const int power = 40;
-	const int turnPower = 30;
 
 	// Advance towards the medium goal that's straight ahead
-	const int advanceMilliseconds = 2500;
-	applyRightSidePower(power);
-	applyLeftSidePower(power);
-	wait1Msec(advanceMilliseconds);
-	stopMotors();
+	const int rampMilliseconds = 1500;
+	goForward(rampMilliseconds);
+	// Fully extend the tube grabber
+	const int servoMeasuringThreshold = 10;
+	servo[leftGrabber] = 0;
+	servo[rightGrabber] = 255;
+	// Wait for them to reach that position
+	while(ServoValue[leftGrabber] > servoMeasuringThreshold && ServoValue[rightGrabber] < (255 - servoMeasuringThreshold)) {}
+	// Go forward until reaching the tube (maybe use the ultrasonic sensor instead of a magic number?)
+	const int tubeMilliseconds = 1000;
+	goForward(tubeMilliseconds);
+	// Lower the tube grabbers
+	servo[leftGrabber] = 128;
+	servo[rightGrabber] = 128;
+	while(ServoValue[rightGrabber] > 128 + servoMeasuringThreshold && ServoValue[leftGrabber] < (128 - servoMeasuringThreshold)) {}
 	// Lift the arm
-
 
 }
