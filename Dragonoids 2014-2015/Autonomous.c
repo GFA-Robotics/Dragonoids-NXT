@@ -29,8 +29,8 @@
 #include "PID.h"
 
 float heading = 0;
-const int power = 40;
-const int turnPower = 25;
+const int drivingPower = 40;
+const int turnPower = 35;
 
 // Motor control functions
 void stopMotors() {
@@ -47,18 +47,25 @@ void applyLeftSidePower(int power) {
 	motor[frontLeft] = power;
 	motor[backLeft] = power;
 }
-void goForward(int forwardTime) {
+void goForwardPower(int forwardTime, int power) {
 	applyRightSidePower(power);
 	applyLeftSidePower(power);
 	wait1Msec(forwardTime);
 	stopMotors();
 }
-void goBackward(int backwardTime) {
+void goBackwardPower(int backwardTime, int power) {
 	applyRightSidePower(-power);
 	applyLeftSidePower(-power);
 	wait1Msec(backwardTime);
 	stopMotors();
 }
+void goForward(int forwardTime) {
+	goForwardPower(forwardTime, drivingPower);
+}
+void goBackward(int backwardTime) {
+	goBackwardPower(backwardTime, drivingPower);
+}
+
 void turnRight(int desiredRelativeHeading) {
 	// Move left side motors forward and right side motors backwards
 	float relativeHeadingOffset = heading;
@@ -132,8 +139,15 @@ task main() {
   StartTask(gyro, kHighPriority);
 
 	// Advance towards the medium goal that's straight ahead
-	const int rampMilliseconds = 1500;
-	goForward(rampMilliseconds);
+	const int rampMilliseconds = 2800;
+	//goForwardPower(rampMilliseconds, 20);
+	const int downRampPower = 20;
+	applyRightSidePower(downRampPower + 8);
+	applyLeftSidePower(downRampPower);
+	wait1Msec(rampMilliseconds);
+	stopMotors();
+	// Turn around
+	turnLeft(50);
 	// Fully extend the tube grabber
 	const int servoMeasuringThreshold = 10;
 	servo[leftGrabber] = 0;
@@ -141,19 +155,30 @@ task main() {
 	// Wait for them to reach that position
 	while(ServoValue[leftGrabber] > servoMeasuringThreshold && ServoValue[rightGrabber] < (255 - servoMeasuringThreshold)) {}
 	// Go forward until reaching the tube (maybe use the ultrasonic sensor instead of a magic number?)
-	const int tubeMilliseconds = 1000;
-	goForward(tubeMilliseconds);
+	const int tubeMilliseconds = 1300;
+	goBackward(tubeMilliseconds);
 	// Lower the tube grabbers
 	servo[leftGrabber] = 128;
 	servo[rightGrabber] = 128;
 	while(ServoValue[rightGrabber] > 128 + servoMeasuringThreshold && ServoValue[leftGrabber] < (128 - servoMeasuringThreshold)) {}
 	// Place a ball in this tube (?)
 	// Move tube to scoring zone
-	const int turnDegrees = 35;
+	const int turnDegrees = 7;
 	turnRight(turnDegrees);
 	// Backwards to scoring zone
-	const int moveToScoringZoneTime = 3000;
-	goBackward(moveToScoringZoneTime);
+	const int moveToScoringZoneTime = 5800;
+	goForward(moveToScoringZoneTime);
+	// Turn into goal
+	turnRight(20);
+	// Back up a bit
+	goBackward(500);
+	// Open the grabbers
+	servo[leftGrabber] = 0;
+	servo[rightGrabber] = 255;
+	// Wait for them to reach that position
+	while(ServoValue[leftGrabber] > servoMeasuringThreshold && ServoValue[rightGrabber] < (255 - servoMeasuringThreshold)) {}
+	// Go forward a bit
+	goForward(500);
 
 	PlaySound(soundUpwardTones);
 	wait1Msec(1000);
