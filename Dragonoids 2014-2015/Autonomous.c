@@ -123,6 +123,14 @@ task main() {
 	// Calibrate the gyro, make sure you hold the sensor still
   HTGYROstartCal(gyroSensor);
   nxtDisplayTextLine(4, "Gyro calibration completed");
+  // Spawn the gyro heading task
+  StartTask(gyro, kHighPriority);
+  // Calculate the dift per second value
+  float initialHeading = heading;
+  wait1Msec(1000);
+  float driftPerSecond = heading - initialHeading;
+  ClearTimer(T2); // T2 used for measuring the elapsed time since drift was calculated
+
   nxtDisplayTextLine(6, "Waiting for start...");
   PlaySound(soundUpwardTones);
   // Open the hopper for a ball to be placed in
@@ -133,10 +141,9 @@ task main() {
 	// Retracted
 	servo[leftGrabber] = 255;
 	servo[rightGrabber] = 0;
- 	waitForStart();
+ 	//waitForStart();
+	wait1Msec(5000);
   eraseDisplay();
-  // Spawn the gyro heading task
-  StartTask(gyro, kHighPriority);
 
 	// Advance towards the medium goal that's straight ahead
 	const int rampMilliseconds = 2800;
@@ -155,7 +162,7 @@ task main() {
 	// Wait for them to reach that position
 	while(ServoValue[leftGrabber] > servoMeasuringThreshold && ServoValue[rightGrabber] < (255 - servoMeasuringThreshold)) {}
 	// Go forward until reaching the tube (maybe use the ultrasonic sensor instead of a magic number?)
-	const int tubeMilliseconds = 1300;
+	const int tubeMilliseconds = 1500;
 	goBackward(tubeMilliseconds);
 	// Lower the tube grabbers
 	servo[leftGrabber] = 128;
@@ -166,10 +173,46 @@ task main() {
 	const int turnDegrees = 7;
 	turnRight(turnDegrees);
 	// Backwards to scoring zone
-	const int moveToScoringZoneTime = 5800;
-	goForward(moveToScoringZoneTime);
-	// Turn into goal
-	turnRight(20);
+	const int moveToScoringZoneTime = 3900;
+	const float movingDesiredHeading = heading - (time1[T2] / 1000) * driftPerSecond;
+	const int correctivePower = 10;
+	ClearTimer(T1);
+	while (time1[T1] < moveToScoringZoneTime) {
+		// Only run this loop every 100 milliseconds (10 Hz)
+		if (time1[T1] % 100 != 0)
+			continue;
+		float correctedHeading = heading - (time1[T2] / 1000) * driftPerSecond;
+		if (correctedHeading - movingDesiredHeading > 2) {
+			// Correct towards the left
+			applyLeftSidePower(drivingPower);
+			applyRightSidePower(drivingPower + 2 * correctivePower);
+		}
+		else if (correctedHeading - movingDesiredHeading > 1) {
+			// Correct towards the left
+			applyLeftSidePower(drivingPower);
+			applyRightSidePower(drivingPower + correctivePower);
+		}
+		else if (correctedHeading - movingDesiredHeading < 2) {
+			// Correct towards the left
+			applyLeftSidePower(drivingPower + 2 * correctivePower);
+			applyRightSidePower(drivingPower);
+		}
+		else if (correctedHeading - movingDesiredHeading < 1) {
+			// Correct towards the right
+			applyLeftSidePower(drivingPower + correctivePower);
+			applyRightSidePower(drivingPower);
+		}
+		else {
+			applyLeftSidePower(drivingPower);
+			applyRightSidePower(drivingPower);
+		}
+	}
+	stopMotors();
+	// Turn towards the edge of the scoring zone
+	turnLeft(5);
+	goForward(800);
+	// Turn around
+	turnLeft(50);
 	// Back up a bit
 	goBackward(500);
 	// Open the grabbers
@@ -178,8 +221,11 @@ task main() {
 	// Wait for them to reach that position
 	while(ServoValue[leftGrabber] > servoMeasuringThreshold && ServoValue[rightGrabber] < (255 - servoMeasuringThreshold)) {}
 	// Go forward a bit
-	goForward(500);
+	goForward(700);
+	// Retract the grabber things (will be opened at beginning of tele-op)
+	servo[leftGrabber] = 255;
+	servo[rightGrabber] = 0;
 
-	PlaySound(soundUpwardTones);
+	PlaySound(soundDownwardTones);
 	wait1Msec(1000);
 }
