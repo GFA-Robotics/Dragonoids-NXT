@@ -173,7 +173,7 @@ task main() {
 	const int turnDegrees = 7;
 	turnRight(turnDegrees);
 	// Backwards to scoring zone
-	const int moveToScoringZoneTime = 3900;
+	const int moveToScoringZoneTime = 3700;
 	const float movingDesiredHeading = heading - (time1[T2] / 1000) * driftPerSecond;
 	const int correctivePower = 10;
 	ClearTimer(T1);
@@ -209,12 +209,22 @@ task main() {
 	}
 	stopMotors();
 	// Turn towards the edge of the scoring zone
-	turnLeft(5);
+	turnLeft(6);
 	goForward(800);
 	// Turn around
 	turnLeft(50);
 	// Back up a bit
 	goBackward(500);
+	// Score a ball
+	/*const int upPower = 55;
+	const int downPower = -30;
+	motor[rightLift] = upPower;
+	motor[leftLift] = upPower;
+	wait1Msec(5200);
+	motor[rightLift] = 0;
+	motor[leftLift] = 0;
+	servo[tilt] = 0;*/
+
 	// Open the grabbers
 	servo[leftGrabber] = 0;
 	servo[rightGrabber] = 255;
@@ -225,6 +235,30 @@ task main() {
 	// Retract the grabber things (will be opened at beginning of tele-op)
 	servo[leftGrabber] = 255;
 	servo[rightGrabber] = 0;
+	while(ServoValue[leftGrabber] < (255 - servoMeasuringThreshold) && ServoValue[rightGrabber] > servoMeasuringThreshold) {}
+	// Measure the IR direction
+	int IRDir = 4; // Actually measure this when not testing
+	switch (IRDir) {
+		case 5:
+			goForward(1400);
+			turnLeft(25);
+			goForward(550);
+			turnLeft(12);
+			break;
+		case 3:
+			goForward(1600);
+			turnLeft(25);
+			goForward(400);
+			turnLeft(15);
+			break;
+		case 4:
+			// TEST THIS CASE
+			goForward(2000);
+			turnRight(14);
+			goBackward(500);
+			turnLeft(15);
+			break;
+	}
 
 	PlaySound(soundDownwardTones);
 	wait1Msec(1000);
