@@ -103,10 +103,8 @@ void driver() {
 	}
 }
 
-const int tiltPositionStart = 110;
+const int tiltPositionStart = 105;
 const int doorPositionStart = 255;
-int tiltPosition = tiltPositionStart;
-int doorPosition = doorPositionStart;
 bool collectorSpinning = false;
 
 void arm() {
@@ -129,30 +127,31 @@ void arm() {
 	// Use the D-pad for the tilt and door mechanisms
 	if (joystick.joy2_TopHat == 0) {
 		// Up
-		if (time1[T1] % 10 == 0)
-			tiltPosition++;
+		if (time1[T1] % 5 == 0)
+			servo[tilt] = ServoValue[tilt] + 1;
 	}
 	if (joystick.joy2_TopHat == 4) {
 		// Down
-		if (time1[T1] % 10 == 0)
-			tiltPosition--;
+		if (time1[T1] % 5 == 0)
+			servo[tilt] = ServoValue[tilt] - 1;
 	}
 	if (joy2Btn(1) == 1) {
 		// Right
-		doorPosition--;
+		servo[collectingDoor] = ServoValue[collectingDoor] - 1;
 	}
 	if (joy2Btn(3) == 1) {
 		// Left
-		doorPosition++;
+		servo[collectingDoor] = ServoValue[collectingDoor] + 1;
 	}
-	if (doorPosition < 110) {
-		doorPosition = 110;
+	if (ServoValue[collectingDoor] < 110) {
+		servo[collectingDoor] = 110;
 	}
-	if (doorPosition > 255) {
-		doorPosition = 255;
+	if (ServoValue[collectingDoor] > 255) {
+		servo[collectingDoor] = 255;
 	}
-	servo[tilt] = tiltPosition;
-	servo[collectingDoor] = doorPosition;
+	if (ServoValue[tilt] > 105) {
+		servo[tilt] = 105;
+	}
 
 	// Spin the ball collector
 	if (joy2Btn(2) == 1) {// && time1[T1] > 100) {
