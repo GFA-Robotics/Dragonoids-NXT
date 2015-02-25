@@ -161,6 +161,9 @@ void arm() {
 	//if (collectorSpinning) {
 		motor[sweeper] = 100;
 	}
+	else if (joy2Btn(4) == 1) {
+		motor[sweeper] = -100;
+	}
 	else {
 		motor[sweeper] = 0;
 	}
