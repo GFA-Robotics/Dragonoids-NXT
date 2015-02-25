@@ -26,7 +26,6 @@
 #include "JoystickDriver.c"
 #include "drivers/hitechnic-irseeker-v2.h"
 #include "drivers/hitechnic-gyro.h"
-#include "PID.h"
 
 float heading = 0;
 const int drivingPower = 40;
@@ -141,8 +140,8 @@ task main() {
 	// Retracted
 	servo[leftGrabber] = 255;
 	servo[rightGrabber] = 0;
- 	//waitForStart();
-	wait1Msec(5000);
+ 	waitForStart();
+	//wait1Msec(5000);
   eraseDisplay();
 
 	// Advance towards the medium goal that's straight ahead
@@ -154,7 +153,7 @@ task main() {
 	wait1Msec(rampMilliseconds);
 	stopMotors();
 	// Turn around
-	turnLeft(50);
+	turnLeft(47);
 	// Fully extend the tube grabber
 	const int servoMeasuringThreshold = 10;
 	servo[leftGrabber] = 0;
@@ -170,7 +169,7 @@ task main() {
 	while(ServoValue[rightGrabber] > 128 + servoMeasuringThreshold && ServoValue[leftGrabber] < (128 - servoMeasuringThreshold)) {}
 	// Place a ball in this tube (?)
 	// Move tube to scoring zone
-	const int turnDegrees = 7;
+	const int turnDegrees = 4;
 	turnRight(turnDegrees);
 	// Backwards to scoring zone
 	const int moveToScoringZoneTime = 3700;
@@ -237,7 +236,7 @@ task main() {
 	servo[rightGrabber] = 0;
 	while(ServoValue[leftGrabber] < (255 - servoMeasuringThreshold) && ServoValue[rightGrabber] > servoMeasuringThreshold) {}
 	// Measure the IR direction
-	int IRDir = 4; // Actually measure this when not testing
+	int IRDir = HTIRS2readACDir(IRSeeker);
 	switch (IRDir) {
 		case 5:
 			goForward(1400);
@@ -257,6 +256,10 @@ task main() {
 			turnRight(14);
 			goBackward(500);
 			turnLeft(15);
+			break;
+		default:
+			turnLeft(1);
+			turnRight(1);
 			break;
 	}
 
