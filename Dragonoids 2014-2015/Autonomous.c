@@ -173,14 +173,14 @@ task main() {
 	turnRight(turnDegrees);
 	// Backwards to scoring zone
 	const int moveToScoringZoneTime = 3700;
-	const float movingDesiredHeading = heading - (time1[T2] / 1000) * driftPerSecond;
+	const float movingDesiredHeading = heading - (time100[T2] / 10) * driftPerSecond;
 	const int correctivePower = 10;
 	ClearTimer(T1);
 	while (time1[T1] < moveToScoringZoneTime) {
 		// Only run this loop every 100 milliseconds (10 Hz)
 		if (time1[T1] % 100 != 0)
 			continue;
-		float correctedHeading = heading - (time1[T2] / 1000) * driftPerSecond;
+		float correctedHeading = heading - (time100[T2] / 10) * driftPerSecond;
 		if (correctedHeading - movingDesiredHeading > 2) {
 			// Correct towards the left
 			applyLeftSidePower(drivingPower);
