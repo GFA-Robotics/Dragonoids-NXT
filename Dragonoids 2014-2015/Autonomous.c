@@ -153,7 +153,7 @@ task main() {
 	wait1Msec(rampMilliseconds);
 	stopMotors();
 	// Turn around
-	turnLeft(47);
+	turnLeft(46);
 	// Fully extend the tube grabber
 	const int servoMeasuringThreshold = 10;
 	servo[leftGrabber] = 0;
